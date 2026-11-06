@@ -7,16 +7,16 @@
 
 ## Summary
 
-The existing one-page application and black, monochrome, champagne-gold identity were preserved. The cinematic intro is now driven by scrolling: the pointer multiplies into arrow echoes, contracts into particles, reforms as the face pointer, expands into a large front-facing face, turns to the supplied side profile, shrinks, and releases the portfolio. Skip, replay, touch scrolling, and reduced-motion behavior remain available. This refinement also removes contribution-history integration, limits the public repository directory to the 12 owner-selected public repositories, adds a manually maintained project-month calendar, replaces overlapping portraits with an accessible single-image gallery, clarifies certificate placeholders, and withholds unverified professional claims.
+The existing one-page application and black, monochrome, champagne-gold identity were preserved. The intro opens with a single pointer glyph; scrolling exponentially multiplies pointer glyphs across the screen. After the screen fills, they contract into particles and form the supplied face, which grows, turns to the side profile, and shrinks away as the portfolio is released. The custom cursor stays hidden during the intro and resumes as a small aligned dotted face after release. Skip, replay, touch scrolling, and reduced-motion behavior remain available. This refinement also removes contribution-history integration, limits the public repository directory to the 12 owner-selected public repositories, adds a manually maintained project-month calendar, replaces overlapping portraits with an accessible single-image gallery, clarifies certificate placeholders, and withholds unverified professional claims.
 
-No portrait files were replaced or deleted. No dependencies were added and no GitHub account data was changed.
+No supplied portrait files were replaced or deleted; `sidepose-cutout.png` is an additional transparent derivative. No dependencies were added and no GitHub account data was changed.
 
 ## Issue register
 
 | Severity | Area / files | Finding and impact | Fix |
 |---|---|---|---|
 | Critical | `src/animation/cinematicRenderer.ts`, `src/components/CinematicIntro.tsx` | The face turn did not read as a rightward 3D rotation and the previous intro ran on a timer rather than responding to the requested scroll sequence. | Make scroll position drive particle dispersion, face formation/growth, depth-aware Y-axis turn to the supplied side portrait, and final shrink/release. Skip jumps to the portfolio; replay resets scroll and all stage values. Reduced-motion users go directly to the site. |
-| Critical | `src/components/IdentityCursor.tsx`, `src/components/CinematicIntro.tsx`, `src/App.css` | The portrait cursor was clipped behind the sticky intro and lacked the requested initial duplication sequence. | Mount the single face cursor above both intro and site; animate one pointer into 2/4/8 arrow cursor echoes that contract into particles and reform as the supplied face pointer. Keep the native cursor over controls, fall back if the portrait is unavailable, and disable the custom cursor on touch/reduced motion. |
+| Critical | `src/components/IdentityCursor.tsx`, `src/components/CinematicIntro.tsx`, `src/animation/cinematicRenderer.ts` | The intro showed a small local cursor swarm while a circular photo cursor appeared immediately, before the full-screen sequence. | Keep the dotted cursor hidden during the intro. Multiply arrow glyphs across the full screen as scrolling advances, then form and turn the face; enable the aligned dotted pointer only after release. |
 | High | `src/services/github.ts`, `src/components/GitHubExplorer.tsx` | Previous GitHub section requested commit/contribution history and displayed activity instead of project timelines. | Removed contribution-history requests and views. Only public repository metadata may enrich the local whitelist; cards remain on network failure. |
 | High | `content/project-timeline.json`, `src/components/ProjectActivityHeatmap.tsx` | No verified project months were available; invented dates would misstate project history. | Added a local project-month mapping with empty month arrays pending confirmation. Calendar marks only configured months and explains how to add confirmed `YYYY-MM` entries. |
 | High | `content/github-repositories.json` | The directory exceeded the owner-selected inventory. | Replaced it with exactly the 12 selected repository names. Excluded and private repository information is absent from the public inventory. |
@@ -54,19 +54,18 @@ The calendar reads only `content/project-timeline.json`. Every project’s month
 - Timeline: production data has no active cells because no project months are confirmed; temporary fixture checked detail rendering and was removed.
 - Gallery: next button, keyboard navigation and simulated mobile swipe passed.
 - Intro: front and turn snapshots captured; Skip, replay after navigation, replay reset and reduced-motion behavior exercised.
-- Scroll intro: cursor echo sequence, formation, turn, shrink, release and Skip/Replay were tested in Chromium using real wheel input; mobile viewport scroll and reduced-motion bypass also passed with no browser exceptions.
-- Cursor: active on blank desktop space, restored native cursor on actual interactive control, hidden for touch.
+- Scroll intro: the page-wide cursor multiplication, face formation, side turn, release, Skip/Replay, mobile viewport scroll, and reduced-motion bypass were exercised in Chromium; no browser exceptions occurred.
+- Cursor: hidden at load and during the intro; after release, it follows the pointer as a small dotted face and restores the native cursor over controls. Disabled for touch and reduced motion.
 - Desktop 1440×900, tablet 768px, and mobile 390×844: no document/body horizontal overflow; mobile navigation scrolls inside its own viewport.
 - Console: no JavaScript exceptions. Local images loaded successfully.
 
-### Scroll intro captures
+### Cursor and intro captures
 
-- `artifacts/phase6-cursor-multiplication.png` — native pointer echoing as multiple arrow cursors.
-- `artifacts/phase6-cursor-formed.png` — echoes resolving into the supplied face pointer.
-- `artifacts/phase6-face-formed.png` — large face after scrolling.
-- `artifacts/phase6-face-turn.png` — turn stage using the supplied side profile.
-- `artifacts/phase6-side-face-small.png` — final shrink stage before entering the portfolio.
-- `artifacts/phase6-mobile-scroll.png` and `phase6-reduced-motion.png` — touch-width scroll stage and reduced-motion portfolio fallback.
+- `artifacts/phase8-multiplying-cursors.png` — page-wide pointer glyphs after scrolling fills the screen.
+- `artifacts/phase8-initial.png` — single pointer at load, with no face cursor visible.
+- `artifacts/phase8-face-forming.png` and `artifacts/phase8-face-formed.png` — the supplied face forming from the cursor field.
+- `artifacts/phase8-profile-turn.png` — the side-profile turn stage.
+- `artifacts/phase8-dot-face-cursor.png` — small dotted cursor after the portfolio is released.
 
 ## Remaining items
 

@@ -10,7 +10,7 @@ type Point = { x: number; y: number; z: number; shade: number; radius: number; p
 type Cloud = { points: Point[]; width: number; height: number; cx: number; cy: number }
 
 const frontCrop: Crop = { x: 0.18, y: 0.005, width: 0.64, height: 0.65 }
-const profileCrop: Crop = { x: 0.38, y: 0.02, width: 0.3, height: 0.22 }
+const profileCrop: Crop = { x: 0.36, y: 0, width: 0.31, height: 0.2 }
 const clamp = (value: number) => Math.max(0, Math.min(1, value))
 const smooth = (value: number) => {
   const t = clamp(value)
@@ -222,21 +222,37 @@ export class CinematicRenderer {
     c.fillStyle = '#000'
     c.fillRect(0, 0, w, h)
 
-    const amount = Math.floor(1 + breach * (this.mobile ? 160 : 280))
+    const amount = Math.floor(2 ** (breach * (this.mobile ? 8 : 9)))
+    const arrowFade = 1 - smooth(identity / 0.38)
+    const arrowScale = (0.72 + breach * 0.32) * arrowFade
     for (let i = 0; i < amount; i++) {
-      const x = random(i + 4) * w + Math.sin(this.clock * 1.5 + i) * 3
-      const y = random(i + 700) * h + Math.cos(this.clock * 1.2 + i * 0.6) * 3
+      const x = amount === 1 ? w / 2 : random(i + 4) * w
+      const y = amount === 1 ? h / 2 : random(i + 700) * h
       const target = this.front?.points[i % Math.max(1, this.front.points.length)]
       const mix = identity * 0.72
       const px = target ? x + (target.x - x) * mix : x
       const py = target ? y + (target.y - y) * mix : y
       const alpha = (1 - identity) * (0.35 + random(i + 42) * 0.42)
-      if (alpha < 0.02) continue
+      if (alpha < 0.02 || arrowScale < 0.02) continue
+      c.save()
       c.globalAlpha = alpha
-      c.fillStyle = '#e4e7ea'
+      c.translate(px, py)
+      c.scale(arrowScale, arrowScale)
       c.beginPath()
-      c.arc(px, py, 0.55 + random(i + 91) * 0.65, 0, Math.PI * 2)
+      c.moveTo(0, 0)
+      c.lineTo(0, 17)
+      c.lineTo(4.6, 12.7)
+      c.lineTo(8.1, 20)
+      c.lineTo(11, 18.5)
+      c.lineTo(7.3, 11.4)
+      c.lineTo(13, 11.2)
+      c.closePath()
+      c.fillStyle = '#e4e7ea'
       c.fill()
+      c.strokeStyle = 'rgba(8,9,11,.92)'
+      c.lineWidth = 0.9
+      c.stroke()
+      c.restore()
     }
     c.globalAlpha = 1
 
@@ -244,7 +260,7 @@ export class CinematicRenderer {
     const spread = (1 - identity) * 0.68
     const yaw = this.profile ? turn * 1.28 : 0
     const faceScale = (0.08 + identity * 0.92) * (1 - collapse * 0.9)
-    const faceOpacity = smooth(identity * 1.8)
+    const faceOpacity = smooth(identity * 1.8) * (1 - collapse)
     if (this.front && faceOpacity > 0.02 && profileMix < 0.35) {
       const cropX = frontCrop.x * this.image.naturalWidth
       const cropY = frontCrop.y * this.image.naturalHeight
@@ -271,12 +287,12 @@ export class CinematicRenderer {
       const imageWidth = this.profile.width * imageScale * faceScale * 0.68
       const imageHeight = this.profile.height * imageScale * faceScale
       c.save()
-      c.globalAlpha = profileMix * 0.52
+      c.globalAlpha = profileMix * (1 - collapse) * 0.52
       c.filter = 'grayscale(1) contrast(1.2) brightness(.72)'
       c.drawImage(this.profileImage, cropX, cropY, cropWidth, cropHeight, w / 2 - imageWidth / 2, h / 2 - imageHeight / 2, imageWidth, imageHeight)
       c.restore()
     }
     if (this.front) this.drawCloud(this.front, faceOpacity * (1 - profileMix), yaw, spread, zoom, faceScale)
-    if (this.profile) this.drawCloud(this.profile, profileMix, 0, spread, zoom, faceScale, 0.68)
+    if (this.profile) this.drawCloud(this.profile, profileMix * (1 - collapse), 0, spread, zoom, faceScale, 0.68)
   }
 }

@@ -12,8 +12,7 @@ export function CinematicIntro() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rendererRef = useRef<CinematicRenderer | null>(null)
   const progressFrameRef = useRef(0)
-  const [coarsePointer] = useState(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches)
-  const startPrompt = coarsePointer ? 'SCROLL TO BEGIN' : 'CURSOR SEQUENCE · THEN SCROLL TO BEGIN'
+  const startPrompt = 'SCROLL TO FILL WITH CURSORS'
   const progress = useRef<IntroProgress>({ breach: 0, identity: 0, turn: 0, collapse: 0 })
   const [reducedMotion] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [introComplete, setIntroComplete] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
@@ -36,23 +35,25 @@ export function CinematicIntro() {
       progressFrameRef.current = 0
       const distance = Math.max(1, runway.offsetHeight - window.innerHeight)
       const travelled = clamp(-runway.getBoundingClientRect().top / distance)
-      progress.current.breach = segment(travelled, 0, 0.26)
-      progress.current.identity = segment(travelled, 0.17, 0.48)
-      progress.current.turn = segment(travelled, 0.44, 0.72)
-      progress.current.collapse = segment(travelled, 0.70, 0.98)
+      progress.current.breach = segment(travelled, 0, 0.29)
+      progress.current.identity = segment(travelled, 0.27, 0.53)
+      progress.current.turn = segment(travelled, 0.49, 0.75)
+      progress.current.collapse = segment(travelled, 0.72, 0.985)
       rendererRef.current?.invalidate()
 
-      const nextPrompt = travelled < 0.16
+      const nextPrompt = travelled < 0.29
         ? startPrompt
-        : travelled < 0.46
+        : travelled < 0.5
           ? 'SCROLL TO FORM THE FACE'
-          : travelled < 0.70
+          : travelled < 0.74
             ? 'SCROLL TO TURN'
-            : travelled < 0.98
+            : travelled < 0.985
               ? 'SCROLL TO RELEASE'
               : 'ENTER THE PORTFOLIO'
       setPrompt((current) => current === nextPrompt ? current : nextPrompt)
-      setIntroComplete(travelled >= 0.995)
+      const complete = travelled >= 0.995
+      setIntroComplete(complete)
+      if (complete) window.dispatchEvent(new Event('portfolio:intro-complete'))
     }
     const requestProgressUpdate = () => {
       if (!progressFrameRef.current) progressFrameRef.current = requestAnimationFrame(updateScrollProgress)
@@ -108,6 +109,7 @@ export function CinematicIntro() {
 
   const skipIntro = useCallback(() => {
     setIntroComplete(true)
+    window.dispatchEvent(new Event('portfolio:intro-complete'))
     jumpTo(runwayRef.current?.offsetHeight ?? 0)
   }, [])
 
