@@ -74,11 +74,13 @@ export function IdentityCursor() {
     front.src = '/images/face.png'
     side.src = '/images/sidepose.png'
     const portraits = { front: [] as Point[], side: [] as Point[] }
-    const motion = { x: -200, y: -200, targetX: -200, targetY: -200, facing: 0, targetFacing: 0 }
-    const state = { visible: false, overControl: false, ready: false, spawnStarted: null as number | null }
+    const startX = innerWidth / 2
+    const startY = innerHeight / 2
+    const motion = { x: startX, y: startY, targetX: startX, targetY: startY, facing: 0, targetFacing: 0 }
+    const state = { visible: true, pointerSeen: false, overControl: false, ready: false, spawnStarted: performance.now() }
     const animationFrame = { id: 0 }
     const updateCursorMode = () => {
-      document.body.classList.toggle('has-identity-cursor', state.visible && state.ready && !state.overControl)
+      document.body.classList.toggle('has-identity-cursor', state.pointerSeen && state.visible && state.ready && !state.overControl)
     }
     const prepare = () => {
       portraits.front = samplePortrait(front, frontCrop)
@@ -86,10 +88,14 @@ export function IdentityCursor() {
       state.ready = portraits.front.length > 0 || portraits.side.length > 0
       updateCursorMode()
       draw()
+      if (performance.now() - state.spawnStarted < spawnDuration) {
+        cancelAnimationFrame(animationFrame.id)
+        animationFrame.id = requestAnimationFrame(animate)
+      }
     }
     const update = (event: PointerEvent) => {
       if (event.pointerType === 'touch') return
-      if (state.spawnStarted === null) state.spawnStarted = performance.now()
+      state.pointerSeen = true
       motion.targetX = Math.max(cursorCenter, Math.min(innerWidth - cursorCenter, event.clientX))
       motion.targetY = Math.max(cursorCenter, Math.min(innerHeight - cursorCenter, event.clientY))
       motion.targetFacing = event.clientX < innerWidth * 0.48 ? 1 : 0

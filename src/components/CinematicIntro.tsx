@@ -13,7 +13,7 @@ export function CinematicIntro() {
   const rendererRef = useRef<CinematicRenderer | null>(null)
   const progressFrameRef = useRef(0)
   const [coarsePointer] = useState(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches)
-  const startPrompt = coarsePointer ? 'SCROLL TO BEGIN' : 'MOVE YOUR CURSOR · THEN SCROLL TO BEGIN'
+  const startPrompt = coarsePointer ? 'SCROLL TO BEGIN' : 'CURSOR SEQUENCE · THEN SCROLL TO BEGIN'
   const progress = useRef<IntroProgress>({ breach: 0, identity: 0, turn: 0, collapse: 0 })
   const [reducedMotion] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [introComplete, setIntroComplete] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
