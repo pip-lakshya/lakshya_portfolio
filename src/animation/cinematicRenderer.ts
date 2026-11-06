@@ -1,106 +1,254 @@
-export interface IntroProgress { breach: number; identity: number; collapse: number }
-interface Point { x: number; y: number; sx: number; sy: number; z: number; shade: number; r: number; phase: number }
-const clamp=(n:number)=>Math.max(0,Math.min(1,n))
-const ease=(n:number)=>{n=clamp(n);return n*n*(3-2*n)}
-const rand=(n:number)=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+export interface IntroProgress {
+  breach: number
+  identity: number
+  turn: number
+  collapse: number
+}
+
+type Crop = { x: number; y: number; width: number; height: number }
+type Point = { x: number; y: number; z: number; shade: number; radius: number; phase: number }
+type Cloud = { points: Point[]; width: number; height: number; cx: number; cy: number }
+
+const frontCrop: Crop = { x: 0.2, y: 0.012, width: 0.62, height: 0.62 }
+const profileCrop: Crop = { x: 0.36, y: 0.235, width: 0.24, height: 0.135 }
+const clamp = (value: number) => Math.max(0, Math.min(1, value))
+const smooth = (value: number) => {
+  const t = clamp(value)
+  return t * t * (3 - 2 * t)
+}
+const random = (seed: number) => {
+  const value = Math.sin(seed * 127.1 + 311.7) * 43758.5453
+  return value - Math.floor(value)
+}
+const luma = (data: Uint8ClampedArray, index: number) =>
+  (data[index] * 0.2126 + data[index + 1] * 0.7152 + data[index + 2] * 0.0722) / 255
 
 export class CinematicRenderer {
-  private ctx: CanvasRenderingContext2D
-  private canvas: HTMLCanvasElement
-  private image: HTMLImageElement
-  private progress: IntroProgress
-  private zoom: {value:number}
-  private observer: ResizeObserver
-  private points: Point[]=[]
-  private w=1
-  private h=1
-  private dpr=1
-  private frame=0
-  private dead=false
-  private last=0
-  private clock=0
-  private readonly mobile=matchMedia('(max-width: 640px)').matches
-  constructor(canvas:HTMLCanvasElement,image:HTMLImageElement,progress:IntroProgress,zoom:{value:number}) {
-    this.canvas=canvas;this.image=image;this.progress=progress;this.zoom=zoom
-    const ctx=canvas.getContext('2d',{alpha:false})
-    if(!ctx) throw new Error('Canvas 2D unavailable')
-    this.ctx=ctx
-    this.observer=new ResizeObserver(()=>this.resize())
-    this.observer.observe(canvas);this.resize();this.frame=requestAnimationFrame(this.tick)
+  private readonly ctx: CanvasRenderingContext2D
+  private readonly canvas: HTMLCanvasElement
+  private readonly image: HTMLImageElement
+  private readonly profileImage: HTMLImageElement
+  private readonly progress: IntroProgress
+  private readonly zoom: { value: number }
+  private readonly observer: ResizeObserver
+  private front: Cloud | null = null
+  private profile: Cloud | null = null
+  private width = 1
+  private height = 1
+  private dpr = 1
+  private frame = 0
+  private dead = false
+  private startTime: number | null = null
+  private clock = 0
+  private readonly mobile = matchMedia('(max-width: 640px)').matches
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    image: HTMLImageElement,
+    profileImage: HTMLImageElement,
+    progress: IntroProgress,
+    zoom: { value: number },
+  ) {
+    this.canvas = canvas
+    this.image = image
+    this.profileImage = profileImage
+    this.progress = progress
+    this.zoom = zoom
+    const context = canvas.getContext('2d', { alpha: false })
+    if (!context) throw new Error('Canvas 2D is unavailable')
+    this.ctx = context
+    this.observer = new ResizeObserver(() => this.resize())
+    this.observer.observe(canvas)
+    this.profileImage.addEventListener('load', this.onProfileLoad)
+    this.profileImage.addEventListener('error', this.onProfileError)
+    this.resize()
+    this.invalidate()
   }
-  invalidate=()=>{this.last=0}
-  setPointer=(_x:number,_y:number)=>{}
-  destroy=()=>{this.dead=true;cancelAnimationFrame(this.frame);this.observer.disconnect()}
-  private resize=()=>{
-    const rect=this.canvas.getBoundingClientRect();this.w=Math.max(1,rect.width);this.h=Math.max(1,rect.height)
-    this.dpr=Math.min(devicePixelRatio||1,this.mobile?1.25:1.6)
-    this.canvas.width=Math.round(this.w*this.dpr);this.canvas.height=Math.round(this.h*this.dpr)
-    this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);this.makePoints();this.last=0
+
+  invalidate = () => {
+    if (this.dead || this.frame) return
+    this.frame = requestAnimationFrame(this.tick)
   }
-  private makePoints=()=>{
-    const cols=this.mobile?64:104, crop={x:this.image.naturalWidth*.18,y:this.image.naturalHeight*.015,w:this.image.naturalWidth*.66,h:this.image.naturalHeight*.67}, rows=Math.round(cols*crop.h/crop.w)
-    const sample=document.createElement('canvas');sample.width=cols;sample.height=rows
-    const c=sample.getContext('2d',{willReadFrequently:true});if(!c)return
-    c.drawImage(this.image,crop.x,crop.y,crop.w,crop.h,0,0,cols,rows)
-    const data=c.getImageData(0,0,cols,rows).data
-    const scale=Math.min(this.w*.68/cols,this.h*.66/rows),left=(this.w-cols*scale)/2,top=(this.h-rows*scale)/2
-    this.points=[]
-    for(let y=1;y<rows-1;y++)for(let x=1;x<cols-1;x++){
-      const i=(y*cols+x)*4, lum=(data[i]*.2126+data[i+1]*.7152+data[i+2]*.0722)/255
-      const lx=(data[i-4]*.2126+data[i-3]*.7152+data[i-2]*.0722)/255
-      const rx=(data[i+4]*.2126+data[i+5]*.7152+data[i+6]*.0722)/255
-      const uy=(data[i-cols*4]*.2126+data[i-cols*4+1]*.7152+data[i-cols*4+2]*.0722)/255
-      const dy=(data[i+cols*4]*.2126+data[i+cols*4+1]*.7152+data[i+cols*4+2]*.0722)/255
-      const edge=Math.min(1,Math.hypot(rx-lx,dy-uy)*3.4)
-      const nx=x/cols,ny=y/rows,ellipse=((nx-.5)/.49)**2+((ny-.5)/.51)**2
-      const facial=Math.max(edge*.85,Math.max(0,(.86-lum)*.48))
-      if(ellipse>1||rand(y*cols+x)>facial*.82+.06)continue
-      const px=left+x*scale,py=top+y*scale
-      const id=this.points.length+1
-      this.points.push({x:px,y:py,sx:(rand(id+91)-.5)*this.w*1.25,sy:(rand(id+177)-.5)*this.h*1.3,z:rand(id+240)*2-1,shade:Math.round(150+lum*105+edge*35),r:.55+rand(id+500)*.75,phase:rand(id+911)*Math.PI*2})
-    }
+
+  reset = () => {
+    this.startTime = null
+    this.clock = 0
+    this.invalidate()
   }
-  private tick=(now:number)=>{
-    if(this.dead)return
-    this.clock=now/1000
-    const active=this.progress.breach<1||this.progress.identity<1||this.progress.collapse<1||this.zoom.value>0&&this.zoom.value<1
-    if(active||this.last===0){this.draw();this.last=now}
-    this.frame=requestAnimationFrame(this.tick)
+
+  destroy = () => {
+    this.dead = true
+    cancelAnimationFrame(this.frame)
+    this.observer.disconnect()
+    this.profileImage.removeEventListener('load', this.onProfileLoad)
+    this.profileImage.removeEventListener('error', this.onProfileError)
   }
-  private draw=()=>{
-    const c=this.ctx,w=this.w,h=this.h,p=this.progress
-    c.fillStyle='#000';c.fillRect(0,0,w,h)
-    const breach=clamp(p.breach),identity=ease(p.identity),collapse=ease(p.collapse),zoom=clamp(this.zoom.value)
-    const amount=Math.floor(1+breach*(this.mobile?185:340))
-    const swarmAlpha=1-identity
-    for(let i=0;i<amount;i++){
-      const t=this.clock,baseX=rand(i+4)*w,baseY=rand(i+700)*h
-      const chaos=1+identity*1.6
-      let x=baseX+Math.sin(t*1.8+i*1.7)*16*chaos,y=baseY+Math.cos(t*1.47+i*.81)*13*chaos
-      if(identity>.02){const target=this.points[i%Math.max(1,this.points.length)];x+=(target?.x??w/2-x)*identity*.68;y+=(target?.y??h/2-y)*identity*.68}
-      const a=swarmAlpha*(.46+rand(i+42)*.5)
-      if(a<=.015)continue
-      c.save();c.translate(x,y);c.rotate(Math.sin(t+i)*.16);c.globalAlpha=a;c.strokeStyle='#f0f2f4';c.fillStyle='#fff';c.lineWidth=1.25
-      c.beginPath();c.moveTo(0,0);c.lineTo(0,12);c.lineTo(3.4,9);c.lineTo(6.7,15);c.lineTo(9,13.8);c.lineTo(5.5,8);c.lineTo(10,7.8);c.closePath();c.fill();c.stroke();c.restore()
-    }
-    if(identity>.001){
-      const pointAlpha=identity*(1-collapse)+collapse
-      const spread=collapse*(1-zoom)*.92
-      const depth=zoom
-      c.save();c.globalCompositeOperation='lighter'
-      for(const q of this.points){
-        const wave=Math.sin(this.clock*2+q.phase)*.9
-        const scatterX=q.sx+Math.sin(this.clock*1.3+q.phase)*24
-        const scatterY=q.sy+Math.cos(this.clock*1.1+q.phase)*24
-        let x=q.x+(scatterX-q.x)*spread,y=q.y+(scatterY-q.y)*spread
-        const scale=1+depth*5
-        x=w/2+(x-w/2)*scale;y=h/2+(y-h/2)*scale
-        const alpha=pointAlpha*(.58+rand(q.phase*100)*.38)
-        const r=q.r*(1+collapse*.65+Math.abs(wave)*.22)
-        c.globalAlpha=alpha;c.fillStyle=`rgb(${q.shade},${q.shade},${Math.min(255,q.shade+4)})`
-        c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill()
+
+  private onProfileLoad = () => {
+    this.profile = this.makeCloud(this.profileImage, profileCrop)
+    this.invalidate()
+  }
+
+  private onProfileError = () => {
+    this.profile = null
+    this.invalidate()
+  }
+
+  private resize = () => {
+    const rect = this.canvas.getBoundingClientRect()
+    this.width = Math.max(1, rect.width)
+    this.height = Math.max(1, rect.height)
+    this.dpr = Math.min(devicePixelRatio || 1, this.mobile ? 1.25 : 1.6)
+    this.canvas.width = Math.round(this.width * this.dpr)
+    this.canvas.height = Math.round(this.height * this.dpr)
+    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0)
+    this.front = this.makeCloud(this.image, frontCrop)
+    if (this.profileImage.naturalWidth) this.profile = this.makeCloud(this.profileImage, profileCrop)
+    this.invalidate()
+  }
+
+  private makeCloud = (image: HTMLImageElement, crop: Crop): Cloud | null => {
+    if (!image.naturalWidth || !image.naturalHeight) return null
+    const columns = this.mobile ? 92 : 120
+    const rows = this.mobile ? 106 : 138
+    const sample = document.createElement('canvas')
+    sample.width = columns
+    sample.height = rows
+    const context = sample.getContext('2d', { willReadFrequently: true })
+    if (!context) return null
+
+    const cropX = crop.x * image.naturalWidth
+    const cropY = crop.y * image.naturalHeight
+    const cropWidth = crop.width * image.naturalWidth
+    const cropHeight = crop.height * image.naturalHeight
+    const fit = Math.min(columns / cropWidth, rows / cropHeight)
+    const drawWidth = cropWidth * fit
+    const drawHeight = cropHeight * fit
+    const offsetX = (columns - drawWidth) / 2
+    const offsetY = (rows - drawHeight) / 2
+    context.clearRect(0, 0, columns, rows)
+    context.drawImage(image, cropX, cropY, cropWidth, cropHeight, offsetX, offsetY, drawWidth, drawHeight)
+    const pixels = context.getImageData(0, 0, columns, rows).data
+    const aspect = cropWidth / cropHeight
+    const boxHeight = Math.min(this.height * 0.62, this.width * 0.64 / aspect)
+    const boxWidth = boxHeight * aspect
+    const left = (this.width - boxWidth) / 2
+    const top = (this.height - boxHeight) / 2
+    const points: Point[] = []
+
+    for (let y = 2; y < rows - 2; y += 2) {
+      for (let x = 2; x < columns - 2; x += 2) {
+        const index = (y * columns + x) * 4
+        if (pixels[index + 3] < 80) continue
+        const center = luma(pixels, index)
+        const horizontal = luma(pixels, index + 4) - luma(pixels, index - 4)
+        const vertical = luma(pixels, index + columns * 4) - luma(pixels, index - columns * 4)
+        const edge = Math.min(1, Math.hypot(horizontal, vertical) * 2.8)
+        const nx = (x - offsetX) / drawWidth
+        const ny = (y - offsetY) / drawHeight
+        const silhouette = ((nx - 0.5) / 0.51) ** 2 + ((ny - 0.5) / 0.54) ** 2
+        if (silhouette > 1.04) continue
+        const detail = Math.max(edge, Math.max(0, 0.9 - center) * 0.52)
+        if (detail < 0.12) continue
+
+        const faceDepth = Math.sqrt(Math.max(0, 1 - silhouette)) * 26
+        const noseDepth = 15 * Math.exp(-(((nx - 0.51) / 0.12) ** 2 + ((ny - 0.53) / 0.12) ** 2))
+        const phase = random(y * columns + x)
+        points.push({
+          x: left + ((x - offsetX) / drawWidth) * boxWidth,
+          y: top + ((y - offsetY) / drawHeight) * boxHeight,
+          z: faceDepth + noseDepth,
+          shade: Math.round(162 + center * 72 + edge * 36),
+          radius: 0.6 + detail * 0.85,
+          phase: phase * Math.PI * 2,
+        })
       }
-      c.restore()
     }
+
+    return { points, width: boxWidth, height: boxHeight, cx: this.width / 2, cy: this.height / 2 }
+  }
+
+  private tick = (now: number) => {
+    this.frame = 0
+    if (this.dead) return
+    if (this.startTime === null) this.startTime = now
+    this.clock = (now - this.startTime) / 1000
+    this.draw()
+    const active =
+      this.progress.breach < 1 ||
+      this.progress.identity < 1 ||
+      this.progress.turn < 1 ||
+      this.progress.collapse < 1 ||
+      (this.zoom.value > 0 && this.zoom.value < 1)
+    if (active) this.frame = requestAnimationFrame(this.tick)
+  }
+
+  private drawCloud = (cloud: Cloud, opacity: number, yaw: number, spread: number, zoom: number) => {
+    if (!cloud || opacity <= 0.01) return
+    const c = this.ctx
+    const cosine = Math.cos(yaw)
+    const sine = Math.sin(yaw)
+    const focalLength = Math.max(360, Math.min(this.width, this.height) * 1.25)
+    const zoomScale = 1 + zoom * 3.7
+    c.save()
+    c.globalCompositeOperation = 'lighter'
+    for (const point of cloud.points) {
+      const drift = Math.sin(this.clock * 1.35 + point.phase) * 0.45
+      const scatterX = (random(point.phase * 997) - 0.5) * this.width * 0.68
+      const scatterY = (random(point.phase * 431) - 0.5) * this.height * 0.64
+      const x0 = point.x + (scatterX - (point.x - cloud.cx)) * spread
+      const y0 = point.y + (scatterY - (point.y - cloud.cy)) * spread
+      const dx = x0 - cloud.cx
+      const dy = y0 - cloud.cy
+      const rotatedX = dx * cosine + point.z * sine
+      const rotatedZ = -dx * sine + point.z * cosine
+      const perspective = focalLength / Math.max(focalLength * 0.58, focalLength - rotatedZ)
+      const x = this.width / 2 + rotatedX * perspective * zoomScale
+      const y = this.height / 2 + dy * perspective * zoomScale
+      const alpha = opacity * (0.72 + random(point.phase * 131) * 0.24)
+      c.globalAlpha = alpha
+      c.fillStyle = 'rgb(' + point.shade + ',' + point.shade + ',' + Math.min(255, point.shade + 5) + ')'
+      c.beginPath()
+      c.arc(x, y, point.radius * (1 + Math.abs(drift)) * (1 + zoom * 0.5), 0, Math.PI * 2)
+      c.fill()
+    }
+    c.restore()
+  }
+
+  private draw = () => {
+    const c = this.ctx
+    const w = this.width
+    const h = this.height
+    const breach = clamp(this.progress.breach)
+    const identity = smooth(this.progress.identity)
+    const turn = smooth(this.progress.turn)
+    const collapse = smooth(this.progress.collapse)
+    const zoom = clamp(this.zoom.value)
+    c.fillStyle = '#000'
+    c.fillRect(0, 0, w, h)
+
+    const amount = Math.floor(1 + breach * (this.mobile ? 160 : 280))
+    for (let i = 0; i < amount; i++) {
+      const x = random(i + 4) * w + Math.sin(this.clock * 1.5 + i) * 3
+      const y = random(i + 700) * h + Math.cos(this.clock * 1.2 + i * 0.6) * 3
+      const target = this.front?.points[i % Math.max(1, this.front.points.length)]
+      const mix = identity * 0.72
+      const px = target ? x + (target.x - x) * mix : x
+      const py = target ? y + (target.y - y) * mix : y
+      const alpha = (1 - identity) * (0.35 + random(i + 42) * 0.42)
+      if (alpha < 0.02) continue
+      c.globalAlpha = alpha
+      c.fillStyle = '#e4e7ea'
+      c.beginPath()
+      c.arc(px, py, 0.55 + random(i + 91) * 0.65, 0, Math.PI * 2)
+      c.fill()
+    }
+    c.globalAlpha = 1
+
+    const profileMix = this.profile ? smooth((turn - 0.42) / 0.58) : 0
+    const spread = collapse * (1 - zoom) * 0.66
+    const yaw = this.profile ? turn * 1.28 : 0
+    if (this.front) this.drawCloud(this.front, 1 - profileMix, yaw, spread, zoom)
+    if (this.profile) this.drawCloud(this.profile, profileMix, 0, spread, zoom)
   }
 }

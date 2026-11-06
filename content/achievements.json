@@ -1,1 +1,76 @@
-{"sourceStatus":{"projectBrief":"partial","resumePdf":"missing","linkedinScreenshots":"missing","linkedinPublicIndex":"partial"},"items":[{"title":"IEEE Ignite winner","details":"Brief: 24-hour SKIT event; indexed LinkedIn: 2026, Team Cipher404, first prize.","verificationRequired":true},{"title":"SIH 2026 ranking","details":"PehchanChain reportedly rank 11 for BEL statement among ~350–400 teams.","verificationRequired":true},{"title":"NariSaarthi traction","details":"50+ first-month users, per brief.","verificationRequired":true},{"title":"Budding Entrepreneur Award 2025–26","source":"LinkedIn public index","verificationRequired":true},{"title":"NPTEL CSR Elite","details":"Index reports 75%, Top 5% among 3,107 candidates, IIT Kharagpur.","verificationRequired":true}],"media":[]}
+{
+  "sourceStatus": {
+    "projectBrief": "partial",
+    "resumePdf": "missing",
+    "linkedinScreenshots": "missing",
+    "linkedinPublicIndex": "partial"
+  },
+  "items": [
+    {
+      "title": "IEEE Ignite winner",
+      "details": "Brief: 24-hour SKIT event; indexed LinkedIn: 2026, Team Cipher404, first prize.",
+      "verificationRequired": true
+    },
+    {
+      "title": "SIH 2026 ranking",
+      "details": "PehchanChain reportedly rank 11 for BEL statement among ~350\u2013400 teams.",
+      "verificationRequired": true
+    },
+    {
+      "title": "NariSaarthi traction",
+      "details": "50+ first-month users, per brief.",
+      "verificationRequired": true
+    },
+    {
+      "title": "Budding Entrepreneur Award 2025\u201326",
+      "source": "LinkedIn public index",
+      "verificationRequired": true
+    },
+    {
+      "title": "NPTEL CSR Elite",
+      "details": "Index reports 75%, Top 5% among 3,107 candidates, IIT Kharagpur.",
+      "verificationRequired": true
+    }
+  ],
+  "media": [],
+  "publicHighlights": [
+    {
+      "id": "project-practice",
+      "label": "PRODUCT PRACTICE",
+      "title": "Projects built around practical problems",
+      "items": [
+        {
+          "label": "LaserGuard",
+          "href": "#work"
+        },
+        {
+          "label": "PehchanChain",
+          "href": "#work"
+        },
+        {
+          "label": "NariSaarthi",
+          "href": "#work"
+        }
+      ]
+    },
+    {
+      "id": "community",
+      "label": "COMMUNITY & LEADERSHIP",
+      "title": "Student and community involvement",
+      "items": [
+        {
+          "label": "E-Cell TOPAZ, SKIT Jaipur",
+          "href": "#experience"
+        },
+        {
+          "label": "BloodConnect",
+          "href": "#experience"
+        },
+        {
+          "label": "NariSaarthi",
+          "href": "#experience"
+        }
+      ]
+    }
+  ]
+}

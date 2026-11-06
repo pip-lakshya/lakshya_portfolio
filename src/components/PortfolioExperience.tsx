@@ -12,13 +12,14 @@ import { GitHubExplorer } from './GitHubExplorer'
 import { CertificateGallery } from './CertificateGallery'
 import { LinkedInActivity } from './LinkedInActivity'
 import { IdentityCursor } from './IdentityCursor'
+import { PortraitGallery } from './PortraitGallery'
 
 type Link = { label: string; url: string; verificationRequired?: boolean }
 const links = socialData.links as Link[]
 const social = (label: string) => links.find((link) => link.label === label)
 const projectSet = projectsData.projects
 const experience = experienceData.entries
-const achievements = achievementsData.items
+const recognitionHighlights = achievementsData.publicHighlights
 const education = educationData.items
 const skills = skillsData.groups
 
@@ -81,7 +82,7 @@ export function PortfolioExperience({ onReplay }: { onReplay: () => void }) {
     <section className="portfolio-about section-pad" id="about">
       <div className="section-heading"><span className="section-kicker">01 / A LITTLE CONTEXT</span><span className="heading-rule" /></div>
       <div className="about-grid">
-        <div className="about-image"><img src="/images/sidepose.png" alt="Lakshya Bhandari, candid side portrait" loading="lazy" /><img className="about-image-inset" src="/images/smile.png" alt="Lakshya Bhandari smiling" loading="lazy" /><span>CURIOUS BY DEFAULT</span></div>
+        <PortraitGallery />
         <div className="about-copy"><h2>Technology is most exciting when it <em>helps someone.</em></h2><p>I’m pursuing a B.Tech in Computer Science Engineering (Data Science) at SKIT Jaipur, with a growing interest in data engineering, AI/ML, full-stack development, and emerging technology.</p><p>I enjoy turning open-ended problems into practical products — from software and connected devices to ideas shaped in hackathons. Entrepreneurship and student leadership have taught me to build with people, not just for a screen.</p><div className="about-note"><span>BASED IN</span><strong>{profile.location}</strong><span>STUDYING</span><strong>{education[0]?.degree ?? 'Education details to be confirmed'}</strong></div></div>
       </div>
     </section>
@@ -106,9 +107,9 @@ export function PortfolioExperience({ onReplay }: { onReplay: () => void }) {
     </section>
 
     <section className="portfolio-recognition section-pad" id="recognition">
-      <div className="section-heading"><span className="section-kicker">05 / RECOGNITION</span><span className="heading-rule" /></div><div className="recognition-heading"><h2>Recognition<br /><em>& milestones.</em></h2></div>
-      <div className="achievement-grid">{achievements.filter((item) => !item.verificationRequired).map((item, index) => <article className="achievement-item" key={item.title}><span className="achievement-no">0{index+1}</span><span className="achievement-mark" aria-hidden="true">✳</span><h3>{item.title}</h3>{item.details && <p>{item.details}</p>}</article>)}
-      {achievements.every((item) => item.verificationRequired) && <p className="recognition-empty">A curated selection of awards and milestones will appear here.</p>}</div>
+      <div className="section-heading"><span className="section-kicker">05 / RECOGNITION</span><span className="heading-rule" /></div><div className="recognition-heading"><h2>Recognition<br /><em>& milestones.</em></h2><p>Milestones shown through the work and communities already named in the portfolio.</p></div>
+      <div className="achievement-grid">{recognitionHighlights.map((highlight) => <article className="achievement-item achievement-item--highlight" key={highlight.id}><span className="achievement-mark" aria-hidden="true">✳</span><span className="achievement-no">{highlight.label}</span><h3>{highlight.title}</h3><ul>{highlight.items.map((item) => <li key={item.label}><a href={item.href}>{item.label}<span aria-hidden="true">↗</span></a></li>)}</ul></article>)}
+      <p className="recognition-context">Awards, rankings, and scores are omitted until their original source records are available.</p></div>
     </section>
 
     <CertificateGallery />

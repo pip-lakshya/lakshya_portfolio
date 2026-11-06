@@ -1,110 +1,63 @@
-# Phase 4 — Portfolio Audit & Refinement
+# Portfolio UI/UX audit and implementation report
 
-**Workspace:** /home/lucky_hacker/Projects/lakshya_portfolio  
-**Audit date:** 2026-11-06  
-**Framework:** React 19, TypeScript, Vite 8, GSAP, Tailwind CSS 4  
-**Validation runtime:** Node 22.23.4
+**Date:** 2026-11-06
+**Workspace:** `/home/lucky_hacker/Projects/lakshya_portfolio`
+**Stack:** React 19, TypeScript, Vite 8, GSAP, Tailwind CSS 4
+**Branch:** `master`
 
 ## Summary
 
-The existing cinematic intro was preserved. The portfolio keeps its black, monochrome, and champagne-gold direction. Centralized content drives the profile, projects, experience, achievements, education, skills, social links, certificate placeholders, LinkedIn posts, and repository inventory. Unverified awards, ranks, metrics, CGPA, and NariSaarthi description are not shown as established public facts.
+The existing one-page application and black, monochrome, champagne-gold identity were preserved. This refinement removes contribution-history integration, limits the public repository directory to the 12 owner-selected public repositories, adds a manually maintained project-month calendar, replaces overlapping portraits with an accessible single-image gallery, clarifies certificate placeholders, and withholds unverified professional claims.
 
-## Workspace and implementation audit
-
-- Workspace is readable and writable from Ubuntu WSL at the requested project path.
-- Branch: master. At audit start there was one existing commit and no configured Git remote.
-- The app uses React/TypeScript with Vite, GSAP and Tailwind. The current Vite build requires a modern Node runtime; Node 18 fails during Vite startup. The build was run with Node 22.23.4.
-- No additional app dependency was installed. Node 22 was invoked from the already available npm package cache for build and browser checks.
-- Content remains in JSON files under content/. UI components consume those files instead of embedding professional details.
-- Added GitHub public-data service and explorer, portrait-based identity cursor, six certificate placeholders, and an empty reusable LinkedIn activity component.
-- The intro supports Skip, replay from the navigation/footer, Escape to skip, and the R replay shortcut. The R shortcut does not fire while an editable field is focused.
+No portrait files were replaced or deleted. No dependencies were added and no GitHub account data was changed.
 
 ## Issue register
 
-| Severity | Area | Finding | Correction / status |
+| Severity | Area / files | Finding and impact | Fix |
 |---|---|---|---|
-| High | Accuracy | Several awards, ranking, user-count, test-count, project-count, hackathon-count, and CGPA claims lack original evidence in the workspace. | Hidden from the public interface; retained in CONTENT_REVIEW.md for confirmation. |
-| High | Dates and titles | E-Cell TOPAZ, BloodConnect, Coplur, and NariSaarthi have source conflicts or incomplete dates/titles. | No dates are displayed. Source discrepancies remain explicit in CONTENT_REVIEW.md. |
-| High | NariSaarthi | Project description and leadership title were not confirmed. | Description is withheld; the experience entry uses a broad “Leadership” role. |
-| Medium | GitHub API | GitHub returned HTTP 403 during repeated browser contexts, consistent with an unauthenticated API rate limit. | Error is handled; the supplied 27-repository inventory remains available as static fallback. Activity requests are now limited to the eight most recently updated public repositories and the calendar scope is labeled. |
-| Medium | Assets | Resume, profile screenshots, project captures, certificates, achievement images, and LinkedIn posts are not present. | No replacement imagery or claims were fabricated. Six neutral certificate placeholders are shown. |
-| Low | Mobile navigation | The original 10-link navigation compressed labels at 390px. | Links now scroll horizontally on mobile instead of shrinking; sticky-header target clearance was added. |
+| Critical | `src/animation/cinematicRenderer.ts`, `src/components/CinematicIntro.tsx` | The face turn did not read as a rightward 3D rotation; extra cursor-like particles and replay state reduced clarity/reliability. | Removed stray swarm particles; sample supplied front and side portraits into point clouds; project with depth-aware Y-axis yaw; synchronize turn/crossfade/collapse/zoom; reset animation and scroll on replay; retain skip, Escape, reduced-motion and asset/canvas fallback. |
+| Critical | `src/components/IdentityCursor.tsx`, `src/App.css` | Custom face and native cursor could conflict; artifacts made the face appear duplicated. | Use one portrait-derived point layer, suppress native cursor only while active, restore it over controls or on error, and disable on touch/reduced motion. |
+| High | `src/services/github.ts`, `src/components/GitHubExplorer.tsx` | Previous GitHub section requested commit/contribution history and displayed activity instead of project timelines. | Removed contribution-history requests and views. Only public repository metadata may enrich the local whitelist; cards remain on network failure. |
+| High | `content/project-timeline.json`, `src/components/ProjectActivityHeatmap.tsx` | No verified project months were available; invented dates would misstate project history. | Added a local project-month mapping with empty month arrays pending confirmation. Calendar marks only configured months and explains how to add confirmed `YYYY-MM` entries. |
+| High | `content/github-repositories.json` | The directory exceeded the owner-selected inventory. | Replaced it with exactly the 12 selected repository names. Excluded and private repository information is absent from the public inventory. |
+| High | `content/achievements.json`, `src/components/PortfolioExperience.tsx` | Recognition was generic while award/outcome claims lacked primary evidence. | Added two source-backed cards for project practice and named community involvement. Unverified awards, ranks, counts, scores and results remain withheld and documented. |
+| Medium | `src/components/PortraitGallery.tsx`, `content/portrait-gallery.json`, `src/components/PortfolioExperience.tsx` | Multiple portraits overlapped and obscured each other. | Added a one-image gallery with previous/next, dots, keyboard navigation, mobile swipe, alt text, stable frame and missing-image fallback. |
+| Medium | `content/certifications.json`, `src/components/CertificateGallery.tsx` | Certificate sources/details were unavailable and the old status wording was unsuitable for public display. | Kept six numbered NPTEL placeholders with “Certificate details pending upload”; added All/Additional/NPTEL groups and an additional-certificates empty state. No non-NPTEL certificate records/assets were present in the workspace. |
+| Medium | `src/App.css`, `src/components/PortfolioExperience.tsx` | Gallery, repository, timeline, certificate, recognition and navigation layouts needed responsive and interaction refinement. | Added responsive layouts, mobile-scroll navigation, focus states, touch behavior and reduced-motion handling within the existing visual direction. |
+| Low | `index.html` | Document title/description were generic. | Updated title, description and social-card metadata using supplied profile information without inventing a public domain or social image. |
 
-## Content and source findings
+## Content and asset audit
 
-- Profile data identifies Lakshya Bhandari, Jaipur, B.Tech Computer Science Engineering (Data Science) at SKIT Jaipur, 2024–2028, and supplied contact/profile links.
-- Projects in the data are LaserGuard, PehchanChain, and NariSaarthi. LaserGuard/PehchanChain summaries and technologies come from the supplied brief. No project screenshots are present. NariSaarthi’s description remains hidden pending confirmation.
-- Public experience shows E-Cell TOPAZ (President, Mentor), BloodConnect (Team Leader), NariSaarthi (Leadership), and Coplur (Internship), without conflicting dates.
-- The technology index groups technologies named in project summaries; it does not rank skill proficiency.
-- Unverified achievement entries and CGPA are not presented publicly.
-- GitHub inventory contains the 27 public repository names supplied in the brief. Live descriptions, languages, update dates, stars, forks, and commit dates appear only when actually returned by GitHub. The calendar uses up to eight recently updated repositories’ default-branch commit records, not an account-wide contribution total. No private repository names are included.
-- LinkedIn post data is empty until the user supplies posts.
+Present portraits: `public/images/face.png`, `sidepose.png`, `smile.png`, and `yellow_blazer.png`. Filenames and originals were retained. A higher-resolution side-profile portrait could improve detail but is optional.
 
-### Unresolved details for Lakshya
+Missing assets: resume PDF, LinkedIn/GitHub screenshots, project screenshots, original NPTEL certificates, non-NPTEL certificate records/assets, achievement images, and LinkedIn posts. No replacement assets or certificate details were fabricated. See `CONTENT_REVIEW.md`.
 
-1. E-Cell President: resume says Present; LinkedIn screenshot summary says July 2025–September 2026, with Mentor from September 2026. Confirm transition and dates.
-2. BloodConnect Team Leader: resume says Present; LinkedIn screenshot summary says December 2025–August 2026. Confirm end date and any successor role.
-3. Coplur internship: resume says 45 days; LinkedIn screenshot summary says May–July 2026. Confirm exact dates and duration.
-4. NariSaarthi: confirm Co-Founder versus Founder & CEO, start date, project description, technologies, and reported user count.
-5. Confirm CGPA 8.57 through semester 4 and whether to publish it.
-6. Supply original proof for awards, SIH ranking, tests passed, user counts, project/hackathon totals, and NPTEL distinctions.
-7. Confirm Coplur title, degree wording/expected graduation, and the skills list.
-8. Provide the missing resume, LinkedIn/GitHub screenshots, project screenshots, certificate/achievement images, and LinkedIn posts as desired.
+Profile, projects, experience, achievements, education, skills, social links, repository inventory, portrait metadata and LinkedIn posts are centralized under `content/`. Conflicting dates/titles and unsupported award/rank/metric claims remain listed for confirmation and are withheld from public UI.
 
-## Asset audit
+## GitHub section
 
-| Asset | Physical status | Intended usage |
-|---|---|---|
-| public/images/face.png (920×992) | Present | Primary face source for cinematic scan and cursor. |
-| public/images/sidepose.png (648×1152) | Present | Side-pose cursor morph and about section. |
-| public/images/smile.png (648×1152) | Present | Friendly portrait inset in the about section. |
-| public/images/yellow_blazer.png (1200×1599) | Present | Hero portrait. |
-| Resume PDF | Missing | Not used. |
-| GitHub/LinkedIn profile screenshots | Missing | No screenshot-sourced claims added. |
-| Project screenshots | Missing | Abstract CSS visuals remain; no mock project screenshots were generated. |
-| NPTEL certificates | Six images missing | Six labeled placeholders only. |
-| Achievement images | Missing | No replacement images used. |
-| LinkedIn posts | Missing | Reusable component is hidden while the data list is empty. |
+The local directory contains exactly:
 
-## UX and visual refinements
+`Stealth-pro`, `SPA`, `Pcos_pre_diagnosis`, `Pehchan_Chain`, `bambocrash`, `zero-dep-jsonify`, `Blauth`, `aura`, `Helpline_manager`, `fake-product-verification`, `smartdukan`, `bctbuddy`.
 
-- Repository cards use actual returned metadata where available; missing data is omitted.
-- Search covers names and descriptions; language filter, update/name sorting, and clear filters are available.
-- The heatmap displays returned default-branch commit dates only. Each day can expose returned repository/message records. Partial/static states are labeled.
-- Project, experience, recognition, certificate, technology, education, and contact sections retain the existing visual system.
-- Portrait assets retain their original filenames. The cursor samples the actual face and side-pose images, has no pointer-event interception, fades over controls, and is disabled for touch and reduced motion.
-- Mobile navigation is horizontally scrollable. Page and body widths did not exceed the requested viewport at 390px.
+Cards use `content/github-repositories.json`; search is by name, language filtering is available when metadata provides languages, and sorting uses update metadata when present. Static cards remain if metadata fetching fails. The public repository-metadata endpoint returned HTTP 200 in the browser run; future API availability is not guaranteed. Contribution/activity data and contribution counts are not requested or shown. No statistics are fabricated.
 
-## Test results
+The calendar reads only `content/project-timeline.json`. Every project’s month list remains empty pending confirmation. Cells represent a configured project month, not daily activity. A temporary test fixture exercised active-month details and was removed before final validation; production data remains empty.
+
+## Verification
 
 - Lint: PASS — 0 warnings, 0 errors.
-- Production build: PASS — Vite 8.3.6, 40 modules transformed under Node 22.23.4.
-- Chromium at 1440×900: no horizontal overflow; all rendered portrait images loaded.
-- Chromium at 390×844: no horizontal overflow; cursor is hidden for touch.
-- Reduced motion: intro Skip control is absent and cursor motion is disabled.
-- Navigation: GitHub anchor navigation verified.
-- GitHub directory: 27 cards rendered; an unmatched search shows the empty state; Clear Filters restores all 27 cards.
-- Keyboard: pressing R while the repository search field is focused does not replay the intro.
-- Intro: navigation replay and Skip controls were exercised.
-- Broken image responses: none observed.
-- Browser JavaScript exceptions: none observed. GitHub API requests did return 403 after repeated test contexts; the application falls back to the static inventory and labels the unavailable/partial activity state.
-- External destinations were checked as rendered links, but the audit did not open each third-party destination.
+- TypeScript and production build: PASS — Vite 8.3.6, 44 modules transformed under Node 22.23.4.
+- Browser JavaScript errors: none observed; broken local image responses: none.
+- GitHub repository metadata request: HTTP 200 in tested run.
+- Repository directory: 12 cards; exclusions absent; name search and empty/clear states passed.
+- Timeline: production data has no active cells because no project months are confirmed; temporary fixture checked detail rendering and was removed.
+- Gallery: next button, keyboard navigation and simulated mobile swipe passed.
+- Intro: front and turn snapshots captured; Skip, replay after navigation, replay reset and reduced-motion behavior exercised.
+- Cursor: active on blank desktop space, restored native cursor on actual interactive control, hidden for touch.
+- Desktop 1440×900, tablet 768px, and mobile 390×844: no document/body horizontal overflow; mobile navigation scrolls inside its own viewport.
+- Console: no JavaScript exceptions. Local images loaded successfully.
 
-## Screenshots
+## Remaining items
 
-Captured under artifacts/:
-
-- phase4-desktop-hero.png — desktop hero at 1440×900.
-- phase4-mobile-home.png — mobile hero at 390×844 after the intro.
-- phase4-projects-desktop.png — project showcase.
-- phase4-github-desktop.png — GitHub directory.
-- phase4-experience-desktop.png — experience timeline.
-- phase4-certificates-desktop.png — six certificate placeholders.
-- phase4-desktop.png and phase4-mobile.png — full-page captures.
-
-## Remaining issues
-
-- The user must provide missing assets and confirm outstanding professional details before those claims can be published.
-- GitHub API rate limits can temporarily prevent live data; the static public repository inventory remains available.
-- LinkedIn posts are not displayed until supplied.
-- The audit exercised major navigation and interactions, but did not run an automated accessibility scanner or verify third-party destinations by opening them.
+Confirm the details in `CONTENT_REVIEW.md`, provide missing source assets if they should be used, and populate project months only from confirmed dates. Live GitHub metadata depends on unauthenticated API availability; the local directory remains the fallback. Full third-party destination verification and an automated accessibility scan were not run.

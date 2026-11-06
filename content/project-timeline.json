@@ -1,0 +1,90 @@
+{
+  "source": "manually maintained project-month mapping; months are intentionally empty until confirmed",
+  "displayMonths": 12,
+  "projects": [
+    {
+      "projectId": "stealth-pro",
+      "projectName": "Stealth-pro",
+      "description": null,
+      "months": [],
+      "color": "green"
+    },
+    {
+      "projectId": "spa",
+      "projectName": "SPA",
+      "description": null,
+      "months": [],
+      "color": "green"
+    },
+    {
+      "projectId": "pcos-pre-diagnosis",
+      "projectName": "Pcos_pre_diagnosis",
+      "description": null,
+      "months": [],
+      "color": "green"
+    },
+    {
+      "projectId": "pehchan-chain",
+      "projectName": "Pehchan_Chain",
+      "description": "Decentralized identity with consent-driven selective disclosure.",
+      "months": [],
+      "color": "green"
+    },
+    {
+      "projectId": "bambocrash",
+      "projectName": "bambocrash",
+      "description": null,
+      "months": [],
+      "color": "green"
+    },
+    {
+      "projectId": "zero-dep-jsonify",
+      "projectName": "zero-dep-jsonify",
+      "description": null,
+      "months": [],
+      "color": "green"
+    },
+    {
+      "projectId": "blauth",
+      "projectName": "Blauth",
+      "description": null,
+      "months": [],
+      "color": "green"
+    },
+    {
+      "projectId": "aura",
+      "projectName": "aura",
+      "description": "A voice-powered personal memory and knowledge retrieval system combining voice interaction, semantic search, and a knowledge graph.",
+      "months": [],
+      "color": "green"
+    },
+    {
+      "projectId": "helpline-manager",
+      "projectName": "Helpline_manager",
+      "description": null,
+      "months": [],
+      "color": "green"
+    },
+    {
+      "projectId": "fake-product-verification",
+      "projectName": "fake-product-verification",
+      "description": null,
+      "months": [],
+      "color": "green"
+    },
+    {
+      "projectId": "smartdukan",
+      "projectName": "smartdukan",
+      "description": "A web-based inventory and sales management system for local shops, including stock tracking and khatabook management.",
+      "months": [],
+      "color": "green"
+    },
+    {
+      "projectId": "bctbuddy",
+      "projectName": "bctbuddy",
+      "description": null,
+      "months": [],
+      "color": "green"
+    }
+  ]
+}

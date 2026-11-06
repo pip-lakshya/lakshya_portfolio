@@ -1,7 +1,8 @@
 {
   "sourceStatus": {
-    "certificateImages": "missing",
-    "certificateDetails": "unverified"
+    "additionalCertificates": "no records or assets present in the current workspace",
+    "nptelImages": "missing",
+    "nptelDetails": "pending original certificate files"
   },
   "items": [
     {
@@ -76,5 +77,6 @@
       "percentile": null,
       "image": null
     }
-  ]
+  ],
+  "additionalCertificates": []
 }
