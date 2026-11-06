@@ -1,16 +1,6 @@
 {
   "items": [
     {
-      "src": "/images/yellow_blazer.png",
-      "alt": "Lakshya Bhandari wearing a yellow blazer",
-      "objectPosition": "50% 28%"
-    },
-    {
-      "src": "/images/face.png",
-      "alt": "Front-facing portrait of Lakshya Bhandari wearing glasses",
-      "objectPosition": "50% 45%"
-    },
-    {
       "src": "/images/smile.png",
       "alt": "Lakshya Bhandari smiling in a light blue shirt",
       "objectPosition": "50% 28%"
