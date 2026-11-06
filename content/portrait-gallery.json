@@ -1,14 +1,17 @@
 {
   "items": [
     {
-      "src": "/images/smile.png",
-      "alt": "Lakshya Bhandari smiling in a light blue shirt",
-      "objectPosition": "50% 28%"
+      "src": "/images/sidepose-cutout.png",
+      "alt": "Side-profile portrait of Lakshya Bhandari",
+      "objectPosition": "50% 0%",
+      "fit": "contain",
+      "treatment": "cutout"
     },
     {
-      "src": "/images/sidepose.png",
-      "alt": "Lakshya Bhandari looking to the side on a rooftop",
-      "objectPosition": "50% 28%"
+      "src": "/images/smile.png",
+      "alt": "Lakshya Bhandari smiling in a light blue shirt",
+      "objectPosition": "50% 0%",
+      "fit": "contain"
     }
   ]
 }

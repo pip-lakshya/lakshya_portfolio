@@ -1,9 +1,8 @@
 import { useEffect, useRef } from 'react'
 
-type Point = { x: number; y: number; light: number; radius: number }
 type Crop = { x: number; y: number; width: number; height: number }
-const frontCrop: Crop = { x: 0.2, y: 0.012, width: 0.62, height: 0.62 }
-const sideCrop: Crop = { x: 0.41, y: 0.25, width: 0.18, height: 0.12 }
+const frontCrop: Crop = { x: 0.18, y: 0.005, width: 0.64, height: 0.65 }
+const sideCrop: Crop = { x: 0.38, y: 0.02, width: 0.3, height: 0.22 }
 const cursorCanvasSize = 300
 const cursorCenter = cursorCanvasSize / 2
 const spawnDuration = 1550
@@ -11,53 +10,6 @@ const clamp = (value: number) => Math.max(0, Math.min(1, value))
 const smooth = (value: number) => {
   const t = clamp(value)
   return t * t * (3 - 2 * t)
-}
-
-function samplePortrait(image: HTMLImageElement, crop: Crop): Point[] {
-  if (!image.naturalWidth || !image.naturalHeight) return []
-  const width = 72
-  const height = 76
-  const surface = document.createElement('canvas')
-  surface.width = width
-  surface.height = height
-  const context = surface.getContext('2d', { willReadFrequently: true })
-  if (!context) return []
-  context.clearRect(0, 0, width, height)
-  context.drawImage(
-    image,
-    crop.x * image.naturalWidth,
-    crop.y * image.naturalHeight,
-    crop.width * image.naturalWidth,
-    crop.height * image.naturalHeight,
-    0,
-    0,
-    width,
-    height,
-  )
-  const pixels = context.getImageData(0, 0, width, height).data
-  const points: Point[] = []
-  const scale = Math.min(92 / width, 92 / height)
-  const offsetX = (cursorCanvasSize - width * scale) / 2
-  const offsetY = (cursorCanvasSize - height * scale) / 2
-  const luminance = (i: number) => (pixels[i] * 0.2126 + pixels[i + 1] * 0.7152 + pixels[i + 2] * 0.0722) / 255
-  for (let y = 1; y < height - 1; y += 2) {
-    for (let x = 1; x < width - 1; x += 2) {
-      const i = (y * width + x) * 4
-      const edge = Math.hypot(luminance(i + 4) - luminance(i - 4), luminance(i + width * 4) - luminance(i - width * 4))
-      const tone = luminance(i)
-      const silhouetteWidth = crop === sideCrop ? 0.62 : 0.49
-      const oval = ((x - width * 0.5) / (width * silhouetteWidth)) ** 2 + ((y - height * 0.5) / (height * 0.52)) ** 2
-      if (oval > 1 || (edge < 0.07 && tone > 0.82)) continue
-      if (edge < 0.08 && tone > 0.68 && (x + y) % 3 === 0) continue
-      points.push({
-        x: offsetX + x * scale,
-        y: offsetY + y * scale,
-        light: Math.round(176 + Math.min(1, edge * 3.8) * 70),
-        radius: 0.62 + Math.min(1, edge * 3) * 0.42,
-      })
-    }
-  }
-  return points
 }
 
 export function IdentityCursor() {
@@ -72,8 +24,7 @@ export function IdentityCursor() {
     const front = new Image()
     const side = new Image()
     front.src = '/images/face.png'
-    side.src = '/images/sidepose.png'
-    const portraits = { front: [] as Point[], side: [] as Point[] }
+    side.src = '/images/sidepose-cutout.png'
     const startX = innerWidth / 2
     const startY = innerHeight / 2
     const motion = { x: startX, y: startY, targetX: startX, targetY: startY, facing: 0, targetFacing: 0 }
@@ -83,9 +34,7 @@ export function IdentityCursor() {
       document.body.classList.toggle('has-identity-cursor', state.pointerSeen && state.visible && state.ready && !state.overControl)
     }
     const prepare = () => {
-      portraits.front = samplePortrait(front, frontCrop)
-      portraits.side = samplePortrait(side, sideCrop)
-      state.ready = portraits.front.length > 0 || portraits.side.length > 0
+      state.ready = front.naturalWidth > 0 || side.naturalWidth > 0
       updateCursorMode()
       draw()
       if (performance.now() - state.spawnStarted < spawnDuration) {
@@ -128,17 +77,6 @@ export function IdentityCursor() {
       const copies = stage >= 0.62 ? 8 : Math.min(8, 2 ** Math.floor(elapsed / 185))
       const orbit = Math.sin(stage * Math.PI) * 104
       const echoScale = 0.9 - smooth((stage - 0.52) / 0.42) * 0.78
-      const drawPoints = (points: Point[], opacity: number, stride = 1, scale = 1, dx = 0, dy = 0) => {
-        if (!points.length || opacity < 0.02) return
-        ctx.globalAlpha = opacity
-        for (let index = 0; index < points.length; index += stride) {
-          const point = points[index]
-          ctx.beginPath()
-          ctx.fillStyle = 'rgb(' + point.light + ',' + point.light + ',' + Math.min(255, point.light + 4) + ')'
-          ctx.arc(cursorCenter + (point.x - cursorCenter) * scale + dx, cursorCenter + (point.y - cursorCenter) * scale + dy, Math.max(0.35, point.radius * scale), 0, Math.PI * 2)
-          ctx.fill()
-        }
-      }
       const drawPointerGlyph = (x: number, y: number, scale: number, opacity: number) => {
         if (opacity < 0.02) return
         ctx.save()
@@ -160,6 +98,36 @@ export function IdentityCursor() {
         ctx.lineWidth = 1
         ctx.stroke()
         ctx.restore()
+      }
+      const drawPortrait = (image: HTMLImageElement, crop: Crop, opacity: number) => {
+        const imageWidth = image.naturalWidth
+        const imageHeight = image.naturalHeight
+        if (!imageWidth || !imageHeight || opacity < 0.02) return
+        const width = 48
+        const height = 56
+        ctx.save()
+        ctx.globalAlpha = opacity
+        ctx.beginPath()
+        ctx.ellipse(cursorCenter, cursorCenter, width / 2, height / 2, 0, 0, Math.PI * 2)
+        ctx.clip()
+        ctx.drawImage(
+          image,
+          crop.x * imageWidth,
+          crop.y * imageHeight,
+          crop.width * imageWidth,
+          crop.height * imageHeight,
+          cursorCenter - width / 2,
+          cursorCenter - height / 2,
+          width,
+          height,
+        )
+        ctx.restore()
+        ctx.globalAlpha = opacity
+        ctx.beginPath()
+        ctx.ellipse(cursorCenter, cursorCenter, width / 2, height / 2, 0, 0, Math.PI * 2)
+        ctx.strokeStyle = 'rgba(223,203,158,.82)'
+        ctx.lineWidth = 1.2
+        ctx.stroke()
       }
       ctx.save()
       ctx.globalCompositeOperation = 'lighter'
@@ -183,8 +151,8 @@ export function IdentityCursor() {
           }
         }
       }
-      drawPoints(portraits.front.length ? portraits.front : portraits.side, (1 - motion.facing) * forming)
-      drawPoints(portraits.side.length ? portraits.side : portraits.front, motion.facing * forming)
+      drawPortrait(front.naturalWidth ? front : side, front.naturalWidth ? frontCrop : sideCrop, (1 - motion.facing) * forming)
+      drawPortrait(side.naturalWidth ? side : front, side.naturalWidth ? sideCrop : frontCrop, motion.facing * forming)
       ctx.restore()
       ctx.globalAlpha = 1
     }

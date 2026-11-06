@@ -1,7 +1,7 @@
 import { useRef, useState, type PointerEvent, type KeyboardEvent } from 'react'
 import portraitData from '../../content/portrait-gallery.json'
 
-type Portrait = { src: string; alt: string; objectPosition: string }
+type Portrait = { src: string; alt: string; objectPosition: string; fit?: 'cover' | 'contain'; treatment?: 'cutout' }
 const portraits = portraitData.items as Portrait[]
 
 export function PortraitGallery() {
@@ -29,10 +29,10 @@ export function PortraitGallery() {
 
   if (!portrait) return null
   return <section className="portrait-gallery" role="region" aria-roledescription="carousel" aria-label="Portrait gallery" tabIndex={0} onKeyDown={onKeyDown}>
-    <div className="portrait-gallery-frame" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { swipe.current = null }}>
+    <div className={'portrait-gallery-frame' + (portrait.treatment === 'cutout' ? ' portrait-gallery-frame--cutout' : '')} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { swipe.current = null }}>
       {imageFailed
         ? <div className="portrait-gallery-fallback" role="status">This portrait is unavailable. Use the gallery controls to view another image.</div>
-        : <img key={portrait.src} src={portrait.src} alt={portrait.alt} style={{ objectPosition: portrait.objectPosition }} onError={() => setFailed((items) => items.includes(index) ? items : [...items, index])} />}
+        : <img key={portrait.src} src={portrait.src} alt={portrait.alt} style={{ objectPosition: portrait.objectPosition, objectFit: portrait.fit ?? 'cover' }} onError={() => setFailed((items) => items.includes(index) ? items : [...items, index])} />}
       <button className="portrait-gallery-control portrait-gallery-control--previous" type="button" onClick={() => move(-1)} aria-label="Previous portrait">‹</button>
       <button className="portrait-gallery-control portrait-gallery-control--next" type="button" onClick={() => move(1)} aria-label="Next portrait">›</button>
       <span className="portrait-gallery-count" aria-live="polite">{String(index + 1).padStart(2, '0')} / {String(portraits.length).padStart(2, '0')}</span>

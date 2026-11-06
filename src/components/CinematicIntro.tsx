@@ -31,7 +31,7 @@ export function CinematicIntro() {
     portrait.decoding = 'async'
     sidePortrait.decoding = 'async'
     portrait.src = '/images/face.png'
-    sidePortrait.src = '/images/sidepose.png'
+    sidePortrait.src = '/images/sidepose-cutout.png'
     const updateScrollProgress = () => {
       progressFrameRef.current = 0
       const distance = Math.max(1, runway.offsetHeight - window.innerHeight)

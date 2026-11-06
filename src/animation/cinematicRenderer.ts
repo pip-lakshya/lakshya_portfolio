@@ -9,8 +9,8 @@ type Crop = { x: number; y: number; width: number; height: number }
 type Point = { x: number; y: number; z: number; shade: number; radius: number; phase: number }
 type Cloud = { points: Point[]; width: number; height: number; cx: number; cy: number }
 
-const frontCrop: Crop = { x: 0.2, y: 0.012, width: 0.62, height: 0.62 }
-const profileCrop: Crop = { x: 0.41, y: 0.25, width: 0.18, height: 0.12 }
+const frontCrop: Crop = { x: 0.18, y: 0.005, width: 0.64, height: 0.65 }
+const profileCrop: Crop = { x: 0.38, y: 0.02, width: 0.3, height: 0.22 }
 const clamp = (value: number) => Math.max(0, Math.min(1, value))
 const smooth = (value: number) => {
   const t = clamp(value)
@@ -103,7 +103,9 @@ export class CinematicRenderer {
     this.canvas.height = Math.round(this.height * this.dpr)
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0)
     this.front = this.makeCloud(this.image, frontCrop)
-    if (this.profileImage.naturalWidth) this.profile = this.makeCloud(this.profileImage, profileCrop)
+    if (this.profileImage.naturalWidth) {
+      this.profile = this.makeCloud(this.profileImage, profileCrop)
+    }
     this.invalidate()
   }
 
@@ -150,7 +152,6 @@ export class CinematicRenderer {
         const silhouette = ((nx - 0.5) / silhouetteWidth) ** 2 + ((ny - 0.5) / 0.54) ** 2
         if (silhouette > 1.04) continue
         const detail = Math.max(edge, Math.max(0, 0.9 - center) * 0.52)
-        if (detail < 0.12) continue
 
         const faceDepth = Math.sqrt(Math.max(0, 1 - silhouette)) * 26
         const noseDepth = 15 * Math.exp(-(((nx - 0.51) / 0.12) ** 2 + ((ny - 0.53) / 0.12) ** 2))
@@ -159,8 +160,8 @@ export class CinematicRenderer {
           x: left + ((x - offsetX) / drawWidth) * boxWidth,
           y: top + ((y - offsetY) / drawHeight) * boxHeight,
           z: faceDepth + noseDepth,
-          shade: Math.round(162 + center * 72 + edge * 36),
-          radius: 0.6 + detail * 0.85,
+          shade: Math.round(138 + center * 100 + edge * 18),
+          radius: 0.7 + detail * 0.56,
           phase: phase * Math.PI * 2,
         })
       }
@@ -244,6 +245,37 @@ export class CinematicRenderer {
     const yaw = this.profile ? turn * 1.28 : 0
     const faceScale = (0.08 + identity * 0.92) * (1 - collapse * 0.9)
     const faceOpacity = smooth(identity * 1.8)
+    if (this.front && faceOpacity > 0.02 && profileMix < 0.35) {
+      const cropX = frontCrop.x * this.image.naturalWidth
+      const cropY = frontCrop.y * this.image.naturalHeight
+      const cropWidth = frontCrop.width * this.image.naturalWidth
+      const cropHeight = frontCrop.height * this.image.naturalHeight
+      const imageScale = 1 + zoom * 3.7
+      const imageWidth = this.front.width * imageScale * faceScale * Math.max(0.18, Math.cos(yaw))
+      const imageHeight = this.front.height * imageScale * faceScale
+      c.save()
+      c.globalAlpha = faceOpacity * (1 - profileMix) * 0.48
+      c.filter = 'grayscale(1) contrast(1.2) brightness(.72)'
+      c.beginPath()
+      c.ellipse(w / 2, h / 2, imageWidth * 0.51, imageHeight * 0.54, 0, 0, Math.PI * 2)
+      c.clip()
+      c.drawImage(this.image, cropX, cropY, cropWidth, cropHeight, w / 2 - imageWidth / 2, h / 2 - imageHeight / 2, imageWidth, imageHeight)
+      c.restore()
+    }
+    if (this.profile && profileMix > 0.02) {
+      const cropX = profileCrop.x * this.profileImage.naturalWidth
+      const cropY = profileCrop.y * this.profileImage.naturalHeight
+      const cropWidth = profileCrop.width * this.profileImage.naturalWidth
+      const cropHeight = profileCrop.height * this.profileImage.naturalHeight
+      const imageScale = 1 + zoom * 3.7
+      const imageWidth = this.profile.width * imageScale * faceScale * 0.68
+      const imageHeight = this.profile.height * imageScale * faceScale
+      c.save()
+      c.globalAlpha = profileMix * 0.52
+      c.filter = 'grayscale(1) contrast(1.2) brightness(.72)'
+      c.drawImage(this.profileImage, cropX, cropY, cropWidth, cropHeight, w / 2 - imageWidth / 2, h / 2 - imageHeight / 2, imageWidth, imageHeight)
+      c.restore()
+    }
     if (this.front) this.drawCloud(this.front, faceOpacity * (1 - profileMix), yaw, spread, zoom, faceScale)
     if (this.profile) this.drawCloud(this.profile, profileMix, 0, spread, zoom, faceScale, 0.68)
   }
