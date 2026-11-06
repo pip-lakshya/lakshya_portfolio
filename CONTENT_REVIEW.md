@@ -35,5 +35,51 @@ Add the resume PDF, LinkedIn/GitHub screenshots, project screenshots, and certif
 ## Source separation
 Project brief: selected facts, not a substitute for the resume. LinkedIn: public index only; direct page blocked. Resume and requested screenshots: unavailable for inspection.
 
-## Phase 3 GitHub repository source
-A static GitHub showcase now uses the public repository names aura and smartdukan in content/github-repositories.json. Public repository search results expose an AURA README and an indexed SmartDukan description. No GitHub API integration or repository statistics are used. Confirm that these are the repositories you want featured and review the technology tags before publication.
+## Previous Phase 3 GitHub note (superseded)
+This early note identified aura and smartdukan as two verified examples and predated the current public repository inventory and API integration. The latest implementation and source limitations are documented in the workspace audit section above.
+
+
+## Latest workspace audit and implementation state
+
+The current repository is accessible at /home/lucky_hacker/Projects/lakshya_portfolio. The working tree had Phase 4 changes pending on branch master; no Git remote is configured and the repository contains one prior commit. The intended GitHub remote must be added before a push can be made.
+
+### Assets physically present
+
+- public/images/face.png — primary facial source for the cursor and cinematic scan; original file retained.
+- public/images/sidepose.png — side-pose source for the cursor morph and about panel.
+- public/images/smile.png — friendly portrait in the about panel.
+- public/images/yellow_blazer.png — professional hero portrait.
+- Six NPTEL certificate placeholders have been created in the content data. All six original certificate images are missing.
+
+Still missing: resume PDF; LinkedIn profile screenshots; GitHub profile screenshots; project screenshots (LaserGuard, PehchanChain, NariSaarthi); certificate images; achievement images; and the LinkedIn post material Lakshya said he would provide. The existing four portraits were not renamed, deleted, regenerated, or replaced.
+
+### Source-based professional content
+
+- Profile: Lakshya Bhandari; Jaipur, India; B.Tech Computer Science Engineering (Data Science), SKIT Jaipur, 2024–2028; email and profile links are in the centralized content files.
+- Leadership/experience: E-Cell TOPAZ, BloodConnect, NariSaarthi, Coplur. Public UI currently uses broad roles where precise titles or dates conflict; internal notes preserve the source differences.
+- Projects: LaserGuard and PehchanChain summaries and technologies are from the supplied project brief. NariSaarthi’s description, title, metrics, and outcome claims remain withheld pending confirmation.
+- Skills/technologies are derived from project descriptions. The UI describes them as a technology index and does not imply proficiency.
+- Awards, results, user counts, hackathon counts, and CGPA are retained only as review data and are withheld from public display pending source confirmation.
+
+### Unresolved dates and claims
+
+1. E-Cell TOPAZ: Resume says President is Present. LinkedIn screenshot summary says President July 2025–September 2026 and Mentor from September 2026. Confirm role transition and dates.
+2. BloodConnect: Resume says Team Leader is Present. LinkedIn screenshot summary says December 2025–August 2026. Confirm end date and whether another role followed.
+3. Coplur: Resume says 45 days; LinkedIn screenshot summary says May–July 2026. Confirm exact start/end dates and duration.
+4. NariSaarthi: Co-Founder versus Founder & CEO; confirm public title and start date. Confirm the project description before publishing it.
+5. Confirm CGPA 8.57 through semester 4, and whether it may be shown publicly.
+6. Verify all stated awards, SIH ranking, user/usage numbers, tests-passed count, project totals, hackathon totals, and NPTEL distinctions from original evidence.
+7. Confirm exact Coplur title, the degree wording/expected graduation, and which technologies represent skills you want listed.
+8. Supply original LinkedIn screenshots/posts, resume, and certificate/project images if you want them used as source material.
+
+### LinkedIn review limits
+
+The supplied LinkedIn URL is recorded in social links. The profile screenshots are not physically present in the workspace, so the requested role progression and discrepancies above come from the user’s written audit brief; they could not be rechecked against image evidence during this workspace audit. LinkedIn posts remain hidden until supplied.
+
+### GitHub implementation source
+
+The public repository directory uses the 27 public repository names supplied in the brief. Live public repository descriptions, languages, update dates, star counts, and fork counts are shown only when returned by GitHub’s API; the static inventory stores no invented statistics. The activity calendar uses returned commit dates only and is explicitly scoped to up to eight recently updated public repositories to limit unauthenticated API requests; it is not presented as a complete profile contribution total. The request is cached in the visitor’s local storage, and static repository inventory remains available if the API is unavailable. Private repository names are not included in the public inventory.
+
+### Portfolio interaction notes
+
+The identity cursor samples the supplied face and side-pose assets. It is disabled for touch and reduced-motion preferences and fades over interactive controls. The cinematic introduction retains its existing look; skip, replay, Escape, and keyboard replay behavior are available. Search keyboard shortcuts are ignored while a text field or editable region has focus.

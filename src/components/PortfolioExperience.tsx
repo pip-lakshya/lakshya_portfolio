@@ -8,7 +8,10 @@ import achievementsData from '../../content/achievements.json'
 import educationData from '../../content/education.json'
 import skillsData from '../../content/skills.json'
 import socialData from '../../content/social-links.json'
-import githubData from '../../content/github-repositories.json'
+import { GitHubExplorer } from './GitHubExplorer'
+import { CertificateGallery } from './CertificateGallery'
+import { LinkedInActivity } from './LinkedInActivity'
+import { IdentityCursor } from './IdentityCursor'
 
 type Link = { label: string; url: string; verificationRequired?: boolean }
 const links = socialData.links as Link[]
@@ -18,13 +21,12 @@ const experience = experienceData.entries
 const achievements = achievementsData.items
 const education = educationData.items
 const skills = skillsData.groups
-const repositories = githubData.repositories
 
 gsap.registerPlugin(ScrollTrigger)
 
 const sections = [
   ['home', 'Home'], ['about', 'About'], ['work', 'Work'], ['github', 'GitHub'], ['experience', 'Experience'],
-  ['recognition', 'Recognition'], ['arsenal', 'Arsenal'], ['education', 'Education'], ['contact', 'Contact'],
+  ['recognition', 'Recognition'], ['certificates', 'Certificates'], ['arsenal', 'Technology'], ['education', 'Education'], ['contact', 'Contact'],
 ] as const
 
 function External({ href, children }: { href: string; children: React.ReactNode }) {
@@ -54,9 +56,11 @@ export function PortfolioExperience({ onReplay }: { onReplay: () => void }) {
   }, [])
 
   return <div className="portfolio-shell" ref={rootRef}>
+    <IdentityCursor />
     <nav className="portfolio-nav" aria-label="Main navigation">
       <a className="nav-monogram" href="#home" aria-label="Lakshya Bhandari, home">LB<span>.</span></a>
       <div className="nav-links">{sections.map(([id, label]) => <a key={id} href={`#${id}`} aria-current={active === id ? 'location' : undefined}>{label}</a>)}</div>
+      <button className="nav-replay" type="button" onClick={onReplay} aria-label="Replay the cinematic introduction">↻ <span>INTRO</span></button>
       <a className="nav-contact" href="#contact">Let’s talk <span>↗</span></a>
     </nav>
 
@@ -87,66 +91,39 @@ export function PortfolioExperience({ onReplay }: { onReplay: () => void }) {
       <div className="work-intro"><h2>Ideas, given<br /><em>somewhere to go.</em></h2><p>A selection of projects exploring safety, identity, and more human-centered technology.</p></div>
       <div className="project-list">{projectSet.map((project, index) => <article className={`project-feature project-feature--${index+1}`} key={project.id}>
         <div className="project-visual"><span className="project-number">0{index+1}</span><div className="project-orbit" aria-hidden="true"><i /><i /><i /></div><span className="project-category">{project.technologies.slice(0,2).join(' / ')}</span></div>
-        <div className="project-copy"><span className="section-kicker">{project.technologies.slice(0, 2).join(' · ')}</span><h3>{project.name}</h3><p>{project.description}</p><div className="project-tech">{project.technologies.map((tech) => <span key={tech}>{tech}</span>)}</div>{project.achievement && <p className="project-note">{project.achievement}<small> · reported, verification pending</small></p>}{project.reportedResults?.map((result) => <p className="project-note" key={result}>{result}<small> · reported, verification pending</small></p>)}<div className="project-links">{project.links.github && <External href={project.links.github}>GitHub</External>}{project.links.liveDemo && <External href={project.links.liveDemo}>Visit project</External>}</div></div>
+        <div className="project-copy"><span className="section-kicker">{project.technologies.slice(0, 2).join(' · ')}</span><h3>{project.name}</h3>{project.description && <p>{project.description}</p>}<div className="project-tech">{project.technologies.map((tech) => <span key={tech}>{tech}</span>)}</div><div className="project-links">{project.links.github && <External href={project.links.github}>GitHub</External>}{project.links.liveDemo && <External href={project.links.liveDemo}>Visit project</External>}</div></div>
       </article>)}</div>
-      <p className="content-caveat">Project descriptions and technologies follow the current project brief. Results marked “reported” still need confirmation.</p>
+      <p className="content-caveat">Project descriptions and technologies follow the available project summaries.</p>
     </section>
 
-    <section className="portfolio-github section-pad" id="github">
-      <div className="section-heading"><span className="section-kicker">03 / ON GITHUB</span><span className="heading-rule" /><span className="github-mark" aria-hidden="true">GH</span></div>
-      <div className="github-intro"><div><span className="section-kicker">A WORKING NOTEBOOK</span><h2>Built in the<br /><em>open.</em></h2></div><div className="github-intro-note"><p>Selected repositories from my developer practice — tools, experiments, and products in progress.</p><a href="https://github.com/pip-lakshya" target="_blank" rel="noreferrer">VISIT GITHUB PROFILE <span aria-hidden="true">↗</span></a></div></div>
-      <div className="repository-grid">{repositories.map((repo, index) => <article className="repository-card" key={repo.name}>
-        <div className="repository-top"><span className="repository-index">REPOSITORY / 0{index + 1}</span><span className="repository-brackets" aria-hidden="true">{ }</span></div>
-        <h3>{repo.name}</h3><p>{repo.description}</p><div className="repository-tags">{repo.technologies.map((technology) => <span key={technology}>{technology}</span>)}</div>
-        <a className="repository-link" href={repo.url} target="_blank" rel="noreferrer">OPEN REPOSITORY <span aria-hidden="true">↗</span></a>
-      </article>)}</div>
-      <p className="content-caveat">Repository details are static and sourced from public repository pages. No stars, forks, or activity metrics are displayed. Live GitHub API integration can be added later if desired.</p>
-    </section>
+    <GitHubExplorer />
 
     <section className="portfolio-experience section-pad" id="experience">
       <div className="section-heading"><span className="section-kicker">04 / EXPERIENCE & LEADERSHIP</span><span className="heading-rule" /></div>
-      <div className="experience-layout">
-        <h2>Learning to lead<br /><em>by doing.</em></h2>
-        <div className="experience-list">{experience.map((item, index) => (
-          <article className="experience-item" key={item.organization}>
-            <span className="experience-index">0{index + 1}</span>
-            <div>
-              <h3>{item.organization}</h3>
-              {item.roles?.map((role) => (
-                <div className="role-wrap" key={role.title}>
-                  <div className="role-line"><strong>{role.title}</strong><span>{role.resumeDates ? `Resume: ${role.resumeDates}` : role.linkedinDates ? `LinkedIn: ${role.linkedinDates}` : 'Dates under review'}</span></div>
-                  {role.resumeDates && role.linkedinDates && <p className="review-flag">LinkedIn reports {role.linkedinDates}; résumé reports {role.resumeDates}. Confirm dates.</p>}
-                </div>
-              ))}
-              {item.title && <div className="role-wrap">
-                <div className="role-line"><strong>{item.title}</strong><span>{item.resumeDates ? `Resume: ${item.resumeDates}` : item.linkedinDates ? `LinkedIn: ${item.linkedinDates}` : item.resumeDuration ? `Resume: ${item.resumeDuration}` : 'Dates under review'}</span></div>
-                {item.resumeDuration && item.linkedinDates && <p className="review-flag">Résumé reports {item.resumeDuration}; LinkedIn reports {item.linkedinDates}. Confirm dates.</p>}
-              </div>}
-              {item.titles?.map((title) => <div className="role-line" key={title}><strong>{title}</strong><span>Title under review · dates not supplied</span></div>)}
-              {item.resumeDates && item.linkedinDates && item.resumeDates !== item.linkedinDates && <p className="review-flag">Date discrepancy · résumé: {item.resumeDates} / LinkedIn: {item.linkedinDates}</p>}
-              {item.status && <p className="review-flag">{item.status}</p>}
-            </div>
-            <span className="experience-arrow">↗</span>
-          </article>
-        ))}</div>
-      </div>
+      <div className="experience-layout"><h2>Learning to lead<br /><em>by doing.</em></h2><div className="experience-list">{experience.map((item, index) => (
+        <article className="experience-item" key={item.organization}><span className="experience-index">0{index + 1}</span><div><h3>{item.organization}</h3>{item.publicRoles?.map((role) => <div className="role-line" key={role}><strong>{role}</strong></div>)}</div><span className="experience-arrow">↗</span></article>
+      ))}</div></div>
     </section>
 
     <section className="portfolio-recognition section-pad" id="recognition">
-      <div className="section-heading"><span className="section-kicker">05 / RECOGNITION</span><span className="heading-rule" /></div><div className="recognition-heading"><h2>Milestones along<br /><em>the way.</em></h2><p>Work recognized, lessons earned, and a few details still being verified.</p></div>
-      <div className="achievement-grid">{achievements.map((item, index) => <article className="achievement-item" key={item.title}><span className="achievement-no">0{index+1}</span><span className="achievement-mark">✳</span><h3>{item.title}</h3><p>{item.details}</p>{item.verificationRequired && <small>REPORTED · VERIFICATION PENDING</small>}</article>)}</div>
+      <div className="section-heading"><span className="section-kicker">05 / RECOGNITION</span><span className="heading-rule" /></div><div className="recognition-heading"><h2>Recognition<br /><em>& milestones.</em></h2></div>
+      <div className="achievement-grid">{achievements.filter((item) => !item.verificationRequired).map((item, index) => <article className="achievement-item" key={item.title}><span className="achievement-no">0{index+1}</span><span className="achievement-mark" aria-hidden="true">✳</span><h3>{item.title}</h3>{item.details && <p>{item.details}</p>}</article>)}
+      {achievements.every((item) => item.verificationRequired) && <p className="recognition-empty">A curated selection of awards and milestones will appear here.</p>}</div>
     </section>
 
+    <CertificateGallery />
+
     <section className="portfolio-skills section-pad" id="arsenal">
-      <div className="section-heading"><span className="section-kicker">06 / TECHNICAL ARSENAL</span><span className="heading-rule" /></div><div className="skills-layout"><h2>Tools for<br /><em>what’s next.</em></h2><div className="skill-groups">{skills.map((group) => <div className="skill-group" key={group.name}><h3>{group.name}</h3><div>{group.items.map((skill) => <span key={skill}>{skill}</span>)}</div></div>)}</div></div><p className="content-caveat">Technologies are associated with project descriptions; individual proficiency levels have not been verified.</p>
+      <div className="section-heading"><span className="section-kicker">07 / TECHNOLOGY INDEX</span><span className="heading-rule" /></div><div className="skills-layout"><h2>Tools for<br /><em>what’s next.</em></h2><div className="skill-groups">{skills.map((group) => <div className="skill-group" key={group.name}><h3>{group.name}</h3><div>{group.items.map((skill) => <span key={skill}>{skill}</span>)}</div></div>)}</div></div><p className="content-caveat">Technologies shown here are drawn from the project descriptions; no proficiency ranking is implied.</p>
     </section>
 
     <section className="portfolio-education section-pad" id="education">
-      <div className="section-heading"><span className="section-kicker">07 / EDUCATION</span><span className="heading-rule" /></div><div className="education-layout"><h2>Grounded in<br /><em>the fundamentals.</em></h2>{education.map((item) => <article className="education-card" key={item.institution}><span>{item.startYear} — {item.expectedEndYear} / EXPECTED</span><h3>{item.degree}</h3><p>{item.institution}</p>{item.cgpa && <p className="education-score">CGPA <strong>{item.cgpa.value}</strong><small>through semester {item.cgpa.throughSemester} · verification pending</small></p>}</article>)}</div>
+      <div className="section-heading"><span className="section-kicker">08 / EDUCATION</span><span className="heading-rule" /></div><div className="education-layout"><h2>Grounded in<br /><em>the fundamentals.</em></h2>{education.map((item) => <article className="education-card" key={item.institution}><span>{item.startYear} — {item.expectedEndYear} / EXPECTED</span><h3>{item.degree}</h3><p>{item.institution}</p>{item.cgpa && !item.cgpa.verificationRequired && <p className="education-score">CGPA <strong>{item.cgpa.value}</strong><small>through semester {item.cgpa.throughSemester}</small></p>}</article>)}</div>
     </section>
 
     <footer className="portfolio-contact section-pad" id="contact">
-      <div className="section-heading"><span className="section-kicker">08 / OPEN CHANNEL</span><span className="heading-rule" /></div><div className="contact-main"><p className="section-kicker">GOOD WORK STARTS WITH A CONVERSATION</p><h2>Have a thoughtful<br /><em>problem in mind?</em></h2><a className="contact-email" href={profile.email ? `mailto:${profile.email}` : '#contact'}>{profile.email ?? 'Get in touch'} <span>↗</span></a></div><div className="contact-footer"><span>{profile.name} · {profile.location}</span><div>{['GitHub','LinkedIn'].map((label) => { const link=social(label); return link ? <External href={link.url} key={label}>{label}</External> : null })}</div><button type="button" onClick={onReplay}>REPLAY INTRO ↻</button><a href="#top">BACK TO TOP ↑</a></div>
+      <div className="section-heading"><span className="section-kicker">09 / OPEN CHANNEL</span><span className="heading-rule" /></div><div className="contact-main"><p className="section-kicker">GOOD WORK STARTS WITH A CONVERSATION</p><h2>Have a thoughtful<br /><em>problem in mind?</em></h2><a className="contact-email" href={profile.email ? `mailto:${profile.email}` : '#contact'}>{profile.email ?? 'Get in touch'} <span>↗</span></a></div><div className="contact-footer"><span>{profile.name} · {profile.location}</span><div>{['GitHub','LinkedIn'].map((label) => { const link=social(label); return link ? <External href={link.url} key={label}>{label}</External> : null })}</div><button type="button" onClick={onReplay}>REPLAY INTRO ↻</button><a href="#top">BACK TO TOP ↑</a></div>
     </footer>
+    <LinkedInActivity />
   </div>
 }
