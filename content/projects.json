@@ -1,0 +1,77 @@
+{
+  "sourceStatus": {
+    "projectBrief": "available",
+    "resumePdf": "missing",
+    "linkedinScreenshots": "missing",
+    "githubScreenshots": "missing",
+    "projectScreenshots": "missing"
+  },
+  "projects": [
+    {
+      "id": "laserguard",
+      "name": "LaserGuard",
+      "description": "ESP32 laser-cutter safety and monitoring system with sensors, alerts, and live web dashboard.",
+      "technologies": [
+        "ESP32",
+        "Embedded C++",
+        "Sensors",
+        "IoT",
+        "Web Dashboard"
+      ],
+      "achievement": "Winner, IEEE Ignite 24-hour hackathon, SKIT",
+      "verificationRequired": true,
+      "media": [],
+      "links": {
+        "github": null,
+        "liveDemo": null
+      }
+    },
+    {
+      "id": "pehchanchain",
+      "name": "PehchanChain",
+      "description": "Decentralized identity with consent-driven selective disclosure.",
+      "technologies": [
+        "React",
+        "Node.js",
+        "Express",
+        "Solidity",
+        "Hardhat",
+        "Polygon Amoy"
+      ],
+      "reportedResults": [
+        "SIH 2026 BEL statement; rank 11 among ~350–400 teams",
+        "204/204 tests passed"
+      ],
+      "verificationRequired": true,
+      "media": [],
+      "links": {
+        "github": null,
+        "liveDemo": null
+      }
+    },
+    {
+      "id": "narisaarthi",
+      "name": "NariSaarthi",
+      "role": "Co-Founder per brief; Founder & CEO needs confirmation",
+      "description": null,
+      "technologies": [
+        "React",
+        "FastAPI",
+        "Python",
+        "scikit-learn",
+        "ML ensemble",
+        "Voice I/O"
+      ],
+      "reportedResults": [
+        "50+ users in first month"
+      ],
+      "verificationRequired": true,
+      "media": [],
+      "links": {
+        "github": null,
+        "liveDemo": "https://narisaarthi.site"
+      },
+      "descriptionNeedsConfirmation": true
+    }
+  ]
+}\n

@@ -1,0 +1,61 @@
+{
+  "sourceStatus": {
+    "projectBrief": "partial",
+    "resumePdf": "missing",
+    "linkedinScreenshots": "missing",
+    "linkedinPublicIndex": "partial"
+  },
+  "entries": [
+    {
+      "organization": "E-Cell TOPAZ, SKIT Jaipur",
+      "roles": [
+        {
+          "title": "President",
+          "resumeDates": "Present (reported)",
+          "linkedinDates": "July 2025–September 2026 (reported)"
+        },
+        {
+          "title": "Mentor",
+          "linkedinDates": "From September 2026 (reported)"
+        }
+      ],
+      "status": "Conflict; confirm dates",
+      "publicRoles": [
+        "President",
+        "Mentor"
+      ]
+    },
+    {
+      "organization": "BloodConnect",
+      "title": "Team Leader",
+      "resumeDates": "Present (reported)",
+      "linkedinDates": "December 2025–August 2026 (reported)",
+      "status": "Conflict; confirm",
+      "publicRoles": [
+        "Team Leader"
+      ]
+    },
+    {
+      "organization": "NariSaarthi",
+      "titles": [
+        "Co-Founder (brief)",
+        "Founder & CEO (request)"
+      ],
+      "dates": null,
+      "status": "Confirm title/start date",
+      "publicRoles": [
+        "Leadership"
+      ]
+    },
+    {
+      "organization": "Coplur",
+      "title": "Intern (exact title unknown)",
+      "resumeDuration": "45 days (reported)",
+      "linkedinDates": "May–July 2026 (reported)",
+      "status": "Conflict; confirm",
+      "publicRoles": [
+        "Internship"
+      ]
+    }
+  ]
+}\n

@@ -1,0 +1,80 @@
+{
+  "sourceStatus": {
+    "certificateImages": "missing",
+    "certificateDetails": "unverified"
+  },
+  "items": [
+    {
+      "id": "nptel-01",
+      "provider": "NPTEL",
+      "title": null,
+      "institution": null,
+      "certificateType": null,
+      "grade": null,
+      "score": null,
+      "term": null,
+      "percentile": null,
+      "image": null
+    },
+    {
+      "id": "nptel-02",
+      "provider": "NPTEL",
+      "title": null,
+      "institution": null,
+      "certificateType": null,
+      "grade": null,
+      "score": null,
+      "term": null,
+      "percentile": null,
+      "image": null
+    },
+    {
+      "id": "nptel-03",
+      "provider": "NPTEL",
+      "title": null,
+      "institution": null,
+      "certificateType": null,
+      "grade": null,
+      "score": null,
+      "term": null,
+      "percentile": null,
+      "image": null
+    },
+    {
+      "id": "nptel-04",
+      "provider": "NPTEL",
+      "title": null,
+      "institution": null,
+      "certificateType": null,
+      "grade": null,
+      "score": null,
+      "term": null,
+      "percentile": null,
+      "image": null
+    },
+    {
+      "id": "nptel-05",
+      "provider": "NPTEL",
+      "title": null,
+      "institution": null,
+      "certificateType": null,
+      "grade": null,
+      "score": null,
+      "term": null,
+      "percentile": null,
+      "image": null
+    },
+    {
+      "id": "nptel-06",
+      "provider": "NPTEL",
+      "title": null,
+      "institution": null,
+      "certificateType": null,
+      "grade": null,
+      "score": null,
+      "term": null,
+      "percentile": null,
+      "image": null
+    }
+  ]
+}\n

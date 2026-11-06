@@ -1,0 +1,252 @@
+{
+  "source": {
+    "type": "static-inventory-with-live-public-api-enrichment",
+    "profile": "https://github.com/pip-lakshya",
+    "note": "Repository names come from the user-provided public inventory. Descriptions and technology metadata are populated only when returned by the public GitHub API or previously verified sources; no commit or popularity counts are fabricated."
+  },
+  "repositories": [
+    {
+      "name": "gfg",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/gfg"
+    },
+    {
+      "name": "Leetcode",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/Leetcode"
+    },
+    {
+      "name": "Stealth-pro",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/Stealth-pro"
+    },
+    {
+      "name": "SPA",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/SPA"
+    },
+    {
+      "name": "Pcos_pre_diagnosis",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/Pcos_pre_diagnosis"
+    },
+    {
+      "name": "algorithms-lab",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/algorithms-lab"
+    },
+    {
+      "name": "compiler-lab",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/compiler-lab"
+    },
+    {
+      "name": "Pehchan_Chain",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/Pehchan_Chain"
+    },
+    {
+      "name": "ml-lab",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/ml-lab"
+    },
+    {
+      "name": "bambocrash",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/bambocrash"
+    },
+    {
+      "name": "zero-dep-jsonify",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/zero-dep-jsonify"
+    },
+    {
+      "name": "Blauth",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/Blauth"
+    },
+    {
+      "name": "docker-spark",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/docker-spark"
+    },
+    {
+      "name": "Assignment18_coplur",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/Assignment18_coplur"
+    },
+    {
+      "name": "Assignment17_coplur",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/Assignment17_coplur"
+    },
+    {
+      "name": "assignment16_coplur",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/assignment16_coplur"
+    },
+    {
+      "name": "assignment15_coplur",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/assignment15_coplur"
+    },
+    {
+      "name": "aura",
+      "description": "A voice-powered personal memory and knowledge retrieval system combining voice interaction, semantic search, and a knowledge graph.",
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/aura"
+    },
+    {
+      "name": "coplur_internship",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/coplur_internship"
+    },
+    {
+      "name": "Calculator",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/Calculator"
+    },
+    {
+      "name": "fsdlab",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/fsdlab"
+    },
+    {
+      "name": "Helpline_manager",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/Helpline_manager"
+    },
+    {
+      "name": "fake-product-verification",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/fake-product-verification"
+    },
+    {
+      "name": "smartdukan",
+      "description": "A web-based inventory and sales management system for local shops, including stock tracking and khatabook management.",
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/smartdukan"
+    },
+    {
+      "name": "bctbuddy",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/bctbuddy"
+    },
+    {
+      "name": "my-first-time",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/my-first-time"
+    },
+    {
+      "name": "n8ntp",
+      "description": null,
+      "language": null,
+      "updatedAt": null,
+      "stars": null,
+      "forks": null,
+      "url": "https://github.com/pip-lakshya/n8ntp"
+    }
+  ]
+}\n
