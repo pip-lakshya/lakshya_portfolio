@@ -1,23 +1,30 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import gsap from 'gsap'
 import { CinematicRenderer, type IntroProgress } from '../animation/cinematicRenderer'
+import { IdentityCursor } from './IdentityCursor'
 import { PortfolioExperience } from './PortfolioExperience'
 
+const clamp = (value: number) => Math.max(0, Math.min(1, value))
+const segment = (value: number, start: number, end: number) => clamp((value - start) / (end - start))
+const jumpTo = (top: number) => window.scrollTo({ top, left: 0, behavior: 'instant' })
+
 export function CinematicIntro() {
+  const runwayRef = useRef<HTMLElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rendererRef = useRef<CinematicRenderer | null>(null)
-  const timelineRef = useRef<gsap.core.Timeline | null>(null)
-  const skipRequestedRef = useRef(false)
-  const [reducedMotion] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-  const [introComplete, setIntroComplete] = useState(false)
-  const [introFailed, setIntroFailed] = useState(false)
+  const progressFrameRef = useRef(0)
+  const [coarsePointer] = useState(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches)
+  const startPrompt = coarsePointer ? 'SCROLL TO BEGIN' : 'MOVE YOUR CURSOR · THEN SCROLL TO BEGIN'
   const progress = useRef<IntroProgress>({ breach: 0, identity: 0, turn: 0, collapse: 0 })
-  const zoom = useRef({ value: 0 })
+  const [reducedMotion] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const [introComplete, setIntroComplete] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const [introFailed, setIntroFailed] = useState(false)
+  const [prompt, setPrompt] = useState(startPrompt)
   const aliveRef = useRef(false)
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    const runway = runwayRef.current
+    if (!canvas || !runway || reducedMotion) return
     aliveRef.current = true
     const portrait = new Image()
     const sidePortrait = new Image()
@@ -25,29 +32,37 @@ export function CinematicIntro() {
     sidePortrait.decoding = 'async'
     portrait.src = '/images/face.png'
     sidePortrait.src = '/images/sidepose.png'
+    const updateScrollProgress = () => {
+      progressFrameRef.current = 0
+      const distance = Math.max(1, runway.offsetHeight - window.innerHeight)
+      const travelled = clamp(-runway.getBoundingClientRect().top / distance)
+      progress.current.breach = segment(travelled, 0, 0.26)
+      progress.current.identity = segment(travelled, 0.17, 0.48)
+      progress.current.turn = segment(travelled, 0.44, 0.72)
+      progress.current.collapse = segment(travelled, 0.70, 0.98)
+      rendererRef.current?.invalidate()
+
+      const nextPrompt = travelled < 0.16
+        ? startPrompt
+        : travelled < 0.46
+          ? 'SCROLL TO FORM THE FACE'
+          : travelled < 0.70
+            ? 'SCROLL TO TURN'
+            : travelled < 0.98
+              ? 'SCROLL TO RELEASE'
+              : 'ENTER THE PORTFOLIO'
+      setPrompt((current) => current === nextPrompt ? current : nextPrompt)
+      setIntroComplete(travelled >= 0.995)
+    }
+    const requestProgressUpdate = () => {
+      if (!progressFrameRef.current) progressFrameRef.current = requestAnimationFrame(updateScrollProgress)
+    }
 
     const start = () => {
       if (!aliveRef.current || !portrait.naturalWidth || rendererRef.current) return
       try {
-        const renderer = new CinematicRenderer(canvas, portrait, sidePortrait, progress.current, zoom.current)
-        rendererRef.current = renderer
-        if (reducedMotion || skipRequestedRef.current) {
-          Object.assign(progress.current, { breach: 1, identity: 1, turn: 1, collapse: 1 })
-          zoom.current.value = 0
-          setIntroComplete(true)
-          renderer.invalidate()
-          return
-        }
-        const timeline = gsap.timeline({ onComplete: () => setIntroComplete(true) })
-        timeline
-          .to({}, { duration: 0.8 })
-          .fromTo(progress.current, { breach: 0 }, { breach: 1, duration: 4, ease: 'power2.inOut', onUpdate: renderer.invalidate })
-          .fromTo(progress.current, { identity: 0 }, { identity: 1, duration: 3, ease: 'power2.inOut', onUpdate: renderer.invalidate })
-          .fromTo(progress.current, { turn: 0 }, { turn: 1, duration: 2.1, ease: 'power2.inOut', onUpdate: renderer.invalidate })
-          .fromTo(progress.current, { collapse: 0 }, { collapse: 1, duration: 4, ease: 'power2.inOut', onUpdate: renderer.invalidate })
-          .to({}, { duration: 1.6 })
-          .to(zoom.current, { value: 1, duration: 1.8, ease: 'power2.in', onUpdate: renderer.invalidate })
-        timelineRef.current = timeline
+        rendererRef.current = new CinematicRenderer(canvas, portrait, sidePortrait, progress.current, { value: 0 })
+        requestProgressUpdate()
       } catch {
         setIntroFailed(true)
         setIntroComplete(true)
@@ -58,66 +73,68 @@ export function CinematicIntro() {
       setIntroFailed(true)
       setIntroComplete(true)
     }
+
     portrait.addEventListener('load', start)
     portrait.addEventListener('error', onPortraitError)
+    window.addEventListener('scroll', requestProgressUpdate, { passive: true })
+    window.addEventListener('resize', requestProgressUpdate)
     if (portrait.complete && portrait.naturalWidth) start()
 
     return () => {
       aliveRef.current = false
+      cancelAnimationFrame(progressFrameRef.current)
+      progressFrameRef.current = 0
       portrait.removeEventListener('load', start)
       portrait.removeEventListener('error', onPortraitError)
-      timelineRef.current?.kill()
+      window.removeEventListener('scroll', requestProgressUpdate)
+      window.removeEventListener('resize', requestProgressUpdate)
       rendererRef.current?.destroy()
-      timelineRef.current = null
       rendererRef.current = null
     }
-  }, [reducedMotion])
+  }, [reducedMotion, startPrompt])
 
   const replayIntro = useCallback(() => {
-    if (introFailed) {
-      document.getElementById('home')?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' })
+    if (introFailed || reducedMotion) {
+      document.getElementById('home')?.scrollIntoView({ behavior: 'auto' })
       return
     }
-    skipRequestedRef.current = false
     Object.assign(progress.current, { breach: 0, identity: 0, turn: 0, collapse: 0 })
-    zoom.current.value = 0
     rendererRef.current?.reset()
+    setPrompt(startPrompt)
     setIntroComplete(false)
-    timelineRef.current?.restart()
-    window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' })
-  }, [introFailed, reducedMotion])
+    window.dispatchEvent(new Event('portfolio:intro-replay'))
+    jumpTo(0)
+  }, [introFailed, reducedMotion, startPrompt])
 
   const skipIntro = useCallback(() => {
-    if (introComplete) return
-    skipRequestedRef.current = true
-    Object.assign(progress.current, { breach: 1, identity: 1, turn: 1, collapse: 1 })
-    zoom.current.value = reducedMotion ? 0 : 1
-    if (timelineRef.current && !reducedMotion) {
-      timelineRef.current.progress(1)
-    } else {
-      setIntroComplete(true)
-      rendererRef.current?.invalidate()
-    }
-  }, [introComplete, reducedMotion])
+    setIntroComplete(true)
+    jumpTo(runwayRef.current?.offsetHeight ?? 0)
+  }, [])
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return
       const target = event.target
       if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || (target instanceof HTMLElement && target.isContentEditable)) return
-      if (event.key === 'Escape' && !introComplete) skipIntro()
+      if (event.key === 'Escape' && !introComplete && !reducedMotion) skipIntro()
       else if (event.key.toLowerCase() === 'r') replayIntro()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [introComplete, replayIntro, skipIntro])
+  }, [introComplete, reducedMotion, replayIntro, skipIntro])
 
   return (
     <main id="top">
-      <section className={'cinematic-runway' + (introFailed ? ' cinematic-runway--failed' : '')} aria-label="Facial identity scan introduction">
+      <IdentityCursor />
+      <section
+        ref={runwayRef}
+        className={'cinematic-runway' + (reducedMotion ? ' cinematic-runway--reduced' : '') + (introFailed ? ' cinematic-runway--failed' : '')}
+        aria-label="Scroll-controlled facial identity introduction"
+      >
         <div className="cinematic-screen">
           <canvas ref={canvasRef} className="cinematic-canvas" aria-hidden="true" />
-          {!introComplete && !reducedMotion && <button className="intro-skip" type="button" onClick={skipIntro}>SKIP INTRO <span aria-hidden="true">↗</span></button>}
+          {!introComplete && !reducedMotion && !introFailed && <button className="intro-skip" type="button" onClick={skipIntro}>SKIP INTRO <span aria-hidden="true">↗</span></button>}
+          {!introComplete && !reducedMotion && !introFailed && <p className="intro-prompt" aria-live="polite">{prompt}</p>}
           {introFailed && <a className="intro-fallback" href="#home">INTRO UNAVAILABLE · CONTINUE TO PORTFOLIO <span aria-hidden="true">↘</span></a>}
         </div>
       </section>

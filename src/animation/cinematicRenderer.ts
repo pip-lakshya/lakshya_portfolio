@@ -10,7 +10,7 @@ type Point = { x: number; y: number; z: number; shade: number; radius: number; p
 type Cloud = { points: Point[]; width: number; height: number; cx: number; cy: number }
 
 const frontCrop: Crop = { x: 0.2, y: 0.012, width: 0.62, height: 0.62 }
-const profileCrop: Crop = { x: 0.36, y: 0.235, width: 0.24, height: 0.135 }
+const profileCrop: Crop = { x: 0.41, y: 0.25, width: 0.18, height: 0.12 }
 const clamp = (value: number) => Math.max(0, Math.min(1, value))
 const smooth = (value: number) => {
   const t = clamp(value)
@@ -146,7 +146,8 @@ export class CinematicRenderer {
         const edge = Math.min(1, Math.hypot(horizontal, vertical) * 2.8)
         const nx = (x - offsetX) / drawWidth
         const ny = (y - offsetY) / drawHeight
-        const silhouette = ((nx - 0.5) / 0.51) ** 2 + ((ny - 0.5) / 0.54) ** 2
+        const silhouetteWidth = crop === profileCrop ? 0.62 : 0.51
+        const silhouette = ((nx - 0.5) / silhouetteWidth) ** 2 + ((ny - 0.5) / 0.54) ** 2
         if (silhouette > 1.04) continue
         const detail = Math.max(edge, Math.max(0, 0.9 - center) * 0.52)
         if (detail < 0.12) continue
@@ -174,16 +175,9 @@ export class CinematicRenderer {
     if (this.startTime === null) this.startTime = now
     this.clock = (now - this.startTime) / 1000
     this.draw()
-    const active =
-      this.progress.breach < 1 ||
-      this.progress.identity < 1 ||
-      this.progress.turn < 1 ||
-      this.progress.collapse < 1 ||
-      (this.zoom.value > 0 && this.zoom.value < 1)
-    if (active) this.frame = requestAnimationFrame(this.tick)
   }
 
-  private drawCloud = (cloud: Cloud, opacity: number, yaw: number, spread: number, zoom: number) => {
+  private drawCloud = (cloud: Cloud, opacity: number, yaw: number, spread: number, zoom: number, scale: number, horizontalScale = 1) => {
     if (!cloud || opacity <= 0.01) return
     const c = this.ctx
     const cosine = Math.cos(yaw)
@@ -203,13 +197,13 @@ export class CinematicRenderer {
       const rotatedX = dx * cosine + point.z * sine
       const rotatedZ = -dx * sine + point.z * cosine
       const perspective = focalLength / Math.max(focalLength * 0.58, focalLength - rotatedZ)
-      const x = this.width / 2 + rotatedX * perspective * zoomScale
-      const y = this.height / 2 + dy * perspective * zoomScale
+      const x = this.width / 2 + rotatedX * perspective * zoomScale * scale * horizontalScale
+      const y = this.height / 2 + dy * perspective * zoomScale * scale
       const alpha = opacity * (0.72 + random(point.phase * 131) * 0.24)
       c.globalAlpha = alpha
       c.fillStyle = 'rgb(' + point.shade + ',' + point.shade + ',' + Math.min(255, point.shade + 5) + ')'
       c.beginPath()
-      c.arc(x, y, point.radius * (1 + Math.abs(drift)) * (1 + zoom * 0.5), 0, Math.PI * 2)
+      c.arc(x, y, Math.max(0.55, point.radius * (1 + Math.abs(drift)) * (1 + zoom * 0.5) * scale), 0, Math.PI * 2)
       c.fill()
     }
     c.restore()
@@ -246,9 +240,11 @@ export class CinematicRenderer {
     c.globalAlpha = 1
 
     const profileMix = this.profile ? smooth((turn - 0.42) / 0.58) : 0
-    const spread = collapse * (1 - zoom) * 0.66
+    const spread = (1 - identity) * 0.68
     const yaw = this.profile ? turn * 1.28 : 0
-    if (this.front) this.drawCloud(this.front, 1 - profileMix, yaw, spread, zoom)
-    if (this.profile) this.drawCloud(this.profile, profileMix, 0, spread, zoom)
+    const faceScale = (0.08 + identity * 0.92) * (1 - collapse * 0.9)
+    const faceOpacity = smooth(identity * 1.8)
+    if (this.front) this.drawCloud(this.front, faceOpacity * (1 - profileMix), yaw, spread, zoom, faceScale)
+    if (this.profile) this.drawCloud(this.profile, profileMix, 0, spread, zoom, faceScale, 0.68)
   }
 }

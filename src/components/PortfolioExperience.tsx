@@ -11,7 +11,6 @@ import socialData from '../../content/social-links.json'
 import { GitHubExplorer } from './GitHubExplorer'
 import { CertificateGallery } from './CertificateGallery'
 import { LinkedInActivity } from './LinkedInActivity'
-import { IdentityCursor } from './IdentityCursor'
 import { PortraitGallery } from './PortraitGallery'
 
 type Link = { label: string; url: string; verificationRequired?: boolean }
@@ -57,7 +56,6 @@ export function PortfolioExperience({ onReplay }: { onReplay: () => void }) {
   }, [])
 
   return <div className="portfolio-shell" ref={rootRef}>
-    <IdentityCursor />
     <nav className="portfolio-nav" aria-label="Main navigation">
       <a className="nav-monogram" href="#home" aria-label="Lakshya Bhandari, home">LB<span>.</span></a>
       <div className="nav-links">{sections.map(([id, label]) => <a key={id} href={`#${id}`} aria-current={active === id ? 'location' : undefined}>{label}</a>)}</div>
